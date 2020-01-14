@@ -46,50 +46,41 @@ a, a code {
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(fig.width=5, fig.height=3, fig.align = "center", message=FALSE, warning = FALSE) 
 
-library(tidyverse)
-library(ggflags)
-library(cowplot)
-library(emo)
-library(xkcd)
-library(DiagrammeR)
+library(magrittr)
+library(ggdag)
+library(dagitty)
+library(pcalg)
+library(bnlearn)
 
-set.seed(1)
-n <- 1000
-X <- rnorm(n, 1)
-Y <- rnorm(n, 1)
-Z <- rpois(n, lambda = 5 * (abs(X + Y)))
+dag <- dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
 
-collider <- data.frame(X=X, Y=Y, Z=Z)
-collider.filtered <- collider %>%
-  dplyr::group_by(Z) %>%
-  dplyr::mutate(cnt = n()) %>%
-  dplyr::ungroup() %>%
-  dplyr::filter(cnt > 40)
-choc <- readr::read_csv(file.path(here::here(), "chocolate.csv"))
-exercise <- readr::read_csv(file.path(here::here(), "exercise_cholesterol.csv"))
-
-n <- 100
-n.obs <- 89
-s <- matrix(0, n, n)
-for (i in seq(n.obs))
-{
-  for (j in seq(i + 1, n.obs + 1)) 
-  {
-    if (runif(1) < .035) 
-    {
-      s[i,j] <- 1
-    }
-  }
-  if (sum(s[i,]) == 0) s[i, sample(seq(i + 1, n.obs + 1), 1)] <- 1
-}
-
-dag <- DiagrammeR::from_adj_matrix(s, mode = "directed")
+    RAF -> PIP2 <- PLCG
+    PIP2 -> PIP3
+    RAF -> MEK
+}')
 ```
 
+---
 
 class: center, middle
 
-<img src="http://www.thegraphicrecorder.com/wp-content/uploads/2012/01/CorrelationCausationFinal1.jpg" width="1000"/>
+# Before we start
+
+- If you want to follow the tutorials on your laptop, we need some packages:
+
+```{r, eval=FALSE}
+install.packages(
+  c("dagitty", "pcalg", "bnlearn")
+)
+```
+
+- `R` tutorials can be found on: https://bit.ly/2thQzES 
+
 
 ---
 
