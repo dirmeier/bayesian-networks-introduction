@@ -1,10 +1,10 @@
 ---
 title: "Bayesian networks in R"
-author: "Simon Dirmeier<br>17. January 2020"
+author: "Simon Dirmeier <simon.dirmeier@bsse.ethz.ch>"
+date: "17. January 2020"
 output:
   xaringan::moon_reader:
     lib_dir: libs
-    css: ["theme.css"]
     nature:
       highlightStyle: github
       highlightLines: true
@@ -12,6 +12,35 @@ output:
       ratio: '16:9'
 
 ---
+
+<style type="text/css">
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,300,600);
+
+h1, h2, h3 {
+  font-family: 'Raleway';
+}
+
+.title-slide, .title-slide h1, .title-slide h3 {
+  color: black;
+  background-color: white;
+  text-shadow: none;
+  font-family: 'Raleway';
+  text-align: left;
+}
+
+.title-slide h1 {
+  margin-top: 30%;
+}
+
+.remark-slide-content {
+    font-size: 30px;
+    font-family: 'Raleway';
+}
+
+a, a code {
+  color: maroon;
+}
+</style>
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
 options(htmltools.dir.version = FALSE)
