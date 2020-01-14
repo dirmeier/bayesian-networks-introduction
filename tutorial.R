@@ -1,29 +1,23 @@
-library(bnlearn)
 library(dplyr)
 
 library(tibble)
+library(ggplot2)
 library(ggdag)
 library(dagitty)
+library(bnlearn)
+
 
 signalling.data <- readRDS("./data/signalling_data.rds")
-signalling.data <- as.data.frame(signalling.data)
-hist(signalling.data[,10])
 
-cat.signalling.data <- apply(signalling.data, 2, function(col) {
-  qs <- quantile(col, probs = c(.25, .75))
-  cut(col, breaks = c(-Inf, qs, Inf), labels = c("Low", "Medium", "High"))
+factor(signalling.data$MEK)
+
+cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
+
+cat.signalling.data <- lapply(cat.signalling.data, function(col) {
+  factor(col, levels = c("Low", "Medium", "High"))
 }) %>% as.data.frame()
 
-cat.signalling.data
 
-par(mfrow=c(2, 1))
-s <- tabu(cat.signalling.data[,4:8], score = )
-plot(s)
-s <- pc.stable(signalling.data[,1:5])
-plot(s)
-
-genes <- colnames(signalling.data)[1:5]
-genes
 
 g <- dagitty('dag {
     RAF [pos="2,2"]
@@ -36,15 +30,19 @@ g <- dagitty('dag {
     PIP2 -> PIP3
     RAF -> MEK
 }')
+plot(g)
 
-ggdag(g) + theme_void()
+dag <- empty.graph(colnames(cat.signalling.data))
+arcs <- dagitty::edges(g)[,1:2] %>%
+  dplyr::mutate(v = as.character(v), w = as.character(w)) %>%
+  dplyr::rename(from=v, to=w)
+arcs(dag) <- arcs
+
+bn_fit <- bn.fit(dag, cat.signalling.data)
 
 
-signalling.data <- readRDS("./data/signalling_data.rds")
-cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
 
-
-par(mfrow=c(2, 3))
+par(mfrow=c(1, 1))
 plot(g)
 s <- tabu(cat.signalling.data, score = "bde")
 plot(s)
@@ -56,4 +54,4 @@ s <- tabu(signalling.data, score = "bge")
 plot(s)
 s <- pc.stable(signalling.data)
 plot(s)
-
+bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)

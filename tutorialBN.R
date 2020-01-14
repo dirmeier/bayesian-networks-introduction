@@ -14,10 +14,10 @@ data(Asia)
 head(Asia)
 #Asia<-Asia[1:500,] #try later
 #store column names, we will need them for plots
-varnames<-colnames(Asia)
+varnames <- colnames(Asia)
 
 #store true graph as a binary matrix
-trueAsia<-matrix(0,nrow=8,ncol=8)
+trueAsia <- matrix(0,nrow=8,ncol=8)
 trueAsia[1,3]<-1
 trueAsia[3,6]<-1
 trueAsia[4,6]<-1

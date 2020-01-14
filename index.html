@@ -38,8 +38,8 @@ h1, h2, h3 {
 }
 
 .remark-slide-content {
-    font-size: 30px;
-    font-family: 'Raleway';
+  font-size: 30px;
+  font-family: 'Raleway';
 }
 
 a, a code {
@@ -47,17 +47,30 @@ a, a code {
 }
 
 .left-column {
-  width: 45%;
-  height: 92%;
-  float: left;
-  padding-top: 1em;
-}
-.right-column {
   width: 50%;
   height: 92%;
-  float: right;
-  padding-top: 1em;
+  float: left;
+  color: black;
+  padding-top: 0em;
 }
+
+.right-column {
+  width: 45%;
+  height: 92%;
+  float: right;
+  color: black;
+  padding-top: 0em;
+}
+
+.mjx-chtml {
+  font-size: 30px !important;
+  color: black;
+}
+
+body {
+  color: black;
+}
+
 &lt;/style&gt;
 
 
@@ -77,40 +90,80 @@ install.packages(c("dagitty", "pcalg", "bnlearn"))
 
 ---
 
-# Bayesian networks
-
-.left-column[
-
-&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
-]
+# What are Bayesian networks
 
 .right-column[
-A Bayesian network is a probability distribution of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
+&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
 
-$$
-P(\cdot)
-$$
+`$$\begin{align}
+P(\cdot)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; \cdot P(\text{MEK} \mid \text{RAF}) \\ &amp; \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ &amp; \cdot P(\text{PIP3} \mid \text{PIP2})
+\end{align}$$`
+]
+
+.left-column[
+A Bayesian network is a probability distribution `\(P\)` of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
+
+- nodes: random variables `\(X_i\)`
+- edges: conditional dependencies
+- factorization: `\(P(X) = \prod_i P(X_i \mid \mathbf{pa}_i)\)`
 ]
 
 ---
 
-# Summary
+# A BN of dependent genes
 
-- Causal inference is hard.
-- Some of the problems:
-    - general non-identifiability
-    - confounders
-    - immoralities
-    - ...
-- If you want to learn something about causality and how to design experiments such that analysis won't fail, consider taking Michael Kaltenbach's course.
+.left-column[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+Gene expression levels:
+
+```
+## # A tibble: 500 x 5
+##    MEK    PIP2   PIP3   PLCG   RAF   
+##    &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt; 
+##  1 Medium Low    High   Medium Medium
+##  2 High   Low    Medium Medium High  
+##  3 Low    Low    Medium High   Medium
+##  4 Medium Medium Medium Medium Medium
+##  5 Medium Low    Low    Low    Medium
+##  6 Low    Medium Low    High   Medium
+##  7 Medium Low    Low    Low    Medium
+##  8 Medium Medium High   Medium Low   
+##  9 High   Low    Low    Medium Low   
+## 10 High   Low    Low    Low    Medium
+## # … with 490 more rows
+```
+]
+
+---
+
+# A BN of dependent genes
+
+.left-column[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+Conditional probabilities of MEK expression
+&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# A BN of dependent genes
+
+Conditional probabilities of PIP2 expression:
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "monokai",
+"highlightStyle": "default",
 "highlightLanguage": "R",
-"highlightLines": true,
-"countIncrementalSlides": false,
 "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {

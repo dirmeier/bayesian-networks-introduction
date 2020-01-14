@@ -6,10 +6,8 @@ output:
   xaringan::moon_reader:
     lib_dir: libs
     nature:
-      highlightStyle: monokai
+      highlightStyle: default
       highlightLanguage: R
-      highlightLines: true
-      countIncrementalSlides: false
       ratio: '16:9'
 
 ---
@@ -34,8 +32,8 @@ h1, h2, h3 {
 }
 
 .remark-slide-content {
-    font-size: 30px;
-    font-family: 'Raleway';
+  font-size: 30px;
+  font-family: 'Raleway';
 }
 
 a, a code {
@@ -43,25 +41,40 @@ a, a code {
 }
 
 .left-column {
-  width: 45%;
-  height: 92%;
-  float: left;
-  padding-top: 1em;
-}
-.right-column {
   width: 50%;
   height: 92%;
-  float: right;
-  padding-top: 1em;
+  float: left;
+  color: black;
+  padding-top: 0em;
 }
+
+.right-column {
+  width: 45%;
+  height: 92%;
+  float: right;
+  color: black;
+  padding-top: 0em;
+}
+
+.mjx-chtml {
+  font-size: 30px !important;
+  color: black;
+}
+
+body {
+  color: black;
+}
+
 </style>
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
 options(htmltools.dir.version = FALSE)
-knitr::opts_chunk$set(fig.width=5, fig.height=3, fig.align = "center", message=FALSE, warning = FALSE) 
+knitr::opts_chunk$set(fig.width=5, fig.height=3, fig.align = "center", message=FALSE, warning = FALSE, dpi=720) 
 
 library(magrittr)
 library(ggplot2)
+library(tibble)
+
 library(ggdag)
 library(dagitty)
 library(pcalg)
@@ -78,6 +91,15 @@ dag <- dagitty::dagitty('dag {
     PIP2 -> PIP3
     RAF -> MEK
 }')
+
+cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
+signalling.data <- readRDS("./data/signalling_data.rds")
+
+bn <- empty.graph(colnames(cat.signalling.data))
+arcs(bn) <- dagitty::edges(dag)[,1:2] %>%
+  dplyr::mutate(v = as.character(v), w = as.character(w)) %>%
+  dplyr::rename(from=v, to=w)
+bn_fit <- bn.fit(bn, cat.signalling.data)
 ```
 
 # Before we start
@@ -94,7 +116,30 @@ install.packages(c("dagitty", "pcalg", "bnlearn"))
 
 ---
 
-# Bayesian networks
+# What are Bayesian networks
+
+.right-column[
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+
+$$\begin{align}
+P(\cdot)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
+\end{align}$$
+]
+
+.left-column[
+A Bayesian network is a probability distribution $P$ of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
+
+- nodes: random variables $X_i$
+- edges: conditional dependencies
+- factorization: $P(X) = \prod_i P(X_i \mid \mathbf{pa}_i)$
+]
+
+---
+
+# A BN of dependent genes
 
 .left-column[
 
@@ -105,22 +150,36 @@ ggdag::ggdag(dag) +
 ]
 
 .right-column[
-A Bayesian network is a probability distribution of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
-
-$$
-P(\cdot)
-$$
+Gene expression levels:
+```{r, echo=FALSE}
+tibble::as.tibble(cat.signalling.data)
+```
 ]
 
 ---
 
-# Summary
+# A BN of dependent genes
 
-- Causal inference is hard.
-- Some of the problems:
-    - general non-identifiability
-    - confounders
-    - immoralities
-    - ...
-- If you want to learn something about causality and how to design experiments such that analysis won't fail, consider taking Michael Kaltenbach's course.
+.left-column[
 
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.right-column[
+Conditional probabilities of MEK expression
+```{r, echo=FALSE}
+bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
+```
+]
+
+---
+
+# A BN of dependent genes
+
+Conditional probabilities of PIP2 expression:
+```{r, echo=FALSE, fig.height=5, fig.width=10}
+bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
+```
