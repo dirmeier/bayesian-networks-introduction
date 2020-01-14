@@ -45,15 +45,52 @@ h1, h2, h3 {
 a, a code {
   color: maroon;
 }
+
+.left-column {
+  width: 45%;
+  height: 92%;
+  float: left;
+  padding-top: 1em;
+}
+.right-column {
+  width: 50%;
+  height: 92%;
+  float: right;
+  padding-top: 1em;
+}
 &lt;/style&gt;
 
 
 
+# Before we start
+
+- We will use `R` for learning Bayesian networks from data.
+- If you want to follow the tutorials on your laptop, you need some packages. Install them using:
+
+
+```r
+install.packages(c("dagitty", "pcalg", "bnlearn"))
+```
+
+- If you want to do them at some point later, the `R` tutorials can be found on: bit.ly/bayesian-networks
+ (the `R` files).
+
 ---
 
-class: center, middle
+# Bayesian networks
 
-&lt;img src="http://www.thegraphicrecorder.com/wp-content/uploads/2012/01/CorrelationCausationFinal1.jpg" width="1000"/&gt;
+.left-column[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.right-column[
+A Bayesian network is a probability distribution of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
+
+$$
+P(\cdot)
+$$
+]
 
 ---
 
@@ -70,7 +107,8 @@ class: center, middle
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "github",
+"highlightStyle": "monokai",
+"highlightLanguage": "R",
 "highlightLines": true,
 "countIncrementalSlides": false,
 "ratio": "16:9"

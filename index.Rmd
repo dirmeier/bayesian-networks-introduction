@@ -6,7 +6,8 @@ output:
   xaringan::moon_reader:
     lib_dir: libs
     nature:
-      highlightStyle: github
+      highlightStyle: monokai
+      highlightLanguage: R
       highlightLines: true
       countIncrementalSlides: false
       ratio: '16:9'
@@ -40,6 +41,19 @@ h1, h2, h3 {
 a, a code {
   color: maroon;
 }
+
+.left-column {
+  width: 45%;
+  height: 92%;
+  float: left;
+  padding-top: 1em;
+}
+.right-column {
+  width: 50%;
+  height: 92%;
+  float: right;
+  padding-top: 1em;
+}
 </style>
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
@@ -47,6 +61,7 @@ options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(fig.width=5, fig.height=3, fig.align = "center", message=FALSE, warning = FALSE) 
 
 library(magrittr)
+library(ggplot2)
 library(ggdag)
 library(dagitty)
 library(pcalg)
@@ -65,22 +80,37 @@ dag <- dagitty::dagitty('dag {
 }')
 ```
 
----
-
-class: center, middle
-
 # Before we start
 
-- If you want to follow the tutorials on your laptop, we need some packages:
+- We will use `R` for learning Bayesian networks from data.
+- If you want to follow the tutorials on your laptop, you need some packages. Install them using:
 
 ```{r, eval=FALSE}
-install.packages(
-  c("dagitty", "pcalg", "bnlearn")
-)
+install.packages(c("dagitty", "pcalg", "bnlearn"))
 ```
 
-- `R` tutorials can be found on: https://bit.ly/2thQzES 
+- If you want to do them at some point later, the `R` tutorials can be found on: bit.ly/bayesian-networks
+ (the `R` files).
 
+---
+
+# Bayesian networks
+
+.left-column[
+
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.right-column[
+A Bayesian network is a probability distribution of a multivariate random variable that factorizes w.r.t. a directed acyclic graph.
+
+$$
+P(\cdot)
+$$
+]
 
 ---
 
