@@ -183,3 +183,19 @@ Conditional probabilities of PIP2 expression:
 ```{r, echo=FALSE, fig.height=5, fig.width=10}
 bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
 ```
+
+---
+
+# Let's learn a BN from data
+## What do we need ?
+
+- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+- Use `bnlearn::tabu`
+
+---
+
+# Let's learn a BN from data
+## R tutorial 1
+
+- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+- Use `bnlearn::tabu`

@@ -8,16 +8,7 @@ library(bnlearn)
 
 
 signalling.data <- readRDS("./data/signalling_data.rds")
-
-factor(signalling.data$MEK)
-
 cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
-
-cat.signalling.data <- lapply(cat.signalling.data, function(col) {
-  factor(col, levels = c("Low", "Medium", "High"))
-}) %>% as.data.frame()
-
-
 
 g <- dagitty('dag {
     RAF [pos="2,2"]
@@ -42,12 +33,18 @@ bn_fit <- bn.fit(dag, cat.signalling.data)
 
 
 
-par(mfrow=c(1, 1))
+par(mfrow=c(3, 1))
 plot(g)
-s <- tabu(cat.signalling.data, score = "bde")
-plot(s)
-s <- pc.stable(cat.signalling.data)
-plot(s)
+tabu.bic <- tabu(cat.signalling.data, score = "bic")
+plot(tabu.bic)
+
+ft <- bn.fit(tabu.bic, cat.signalling.data, method = "mle")
+ft$PIP2
+ft <- bn.fit(tabu.bic, cat.signalling.data, method = "bayes")
+ft$PIP2
+
+tabu.bde <- tabu(cat.signalling.data, score = "bde")
+plot(tabu.bde)
 
 plot(g)
 s <- tabu(signalling.data, score = "bge")
