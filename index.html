@@ -127,7 +127,7 @@ install.packages("bnlearn")
 &lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
 
 `$$\begin{align}
-P(\cdot)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; \cdot P(\text{MEK} \mid \text{RAF}) \\ &amp; \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ &amp; \cdot P(\text{PIP3} \mid \text{PIP2})
+P(\cdot \mid \theta, G)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; \cdot P(\text{MEK} \mid \text{RAF}) \\ &amp; \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ &amp; \cdot P(\text{PIP3} \mid \text{PIP2})
 \end{align}$$`
 ]
 
@@ -136,7 +136,7 @@ A Bayesian network is a probability distribution `\(P\)` of a multivariate rando
 
 - nodes: random variables `\(X_i\)`
 - edges: conditional dependencies
-- factorization: `\(P(X) = \prod_i P(X_i \mid \mathbf{pa}_i)\)`
+- factorization: `\(P(X \mid \theta, G) = \prod_i P(X_i \mid \mathbf{pa}_i)\)`
 ]
 
 ---
@@ -148,73 +148,71 @@ A Bayesian network is a probability distribution `\(P\)` of a multivariate rando
 ]
 
 .left-column[
-Gene expression levels of some genes
+
+Dependent gene expression levels
+
+
+```r
+head(data)
+```
 
 ```
-## # A tibble: 500 x 5
-##    MEK    PIP2   PIP3   PLCG   RAF   
-##    &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt;  &lt;fct&gt; 
-##  1 Medium Low    High   Medium Medium
-##  2 High   Low    Medium Medium High  
-##  3 Low    Low    Medium High   Medium
-##  4 Medium Medium Medium Medium Medium
-##  5 Medium Low    Low    Low    Medium
-##  6 Low    Medium Low    High   Medium
-##  7 Medium Low    Low    Low    Medium
-##  8 Medium Medium High   Medium Low   
-##  9 High   Low    Low    Medium Low   
-## 10 High   Low    Low    Low    Medium
-## # … with 490 more rows
+##      MEK   PIP2   PIP3   PLCG    RAF
+## 1 Medium    Low   High Medium Medium
+## 2   High    Low Medium Medium   High
+## 3    Low    Low Medium   High Medium
+## 4 Medium Medium Medium Medium Medium
+## 5 Medium    Low    Low    Low Medium
+## 6    Low Medium    Low   High Medium
 ```
 ]
 
 ---
 
-# Discrete Bayesian networks
+# A BN of dependent genes
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="10%" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
 
 .small[
 
-```r
-(raf_high &lt;- sum(data$RAF == "High"))
-```
-
-```
-## [1] 125
-```
 
 ```r
-(mek_med_raf_high &lt;- sum(data$MEK == "Medium" &amp; data$RAF == "High"))
-```
-
-```
-## [1] 62
-```
-
-```r
+raf_high &lt;- sum(data$RAF == "High")
+mek_med_raf_high &lt;- sum(data$MEK == "Medium" &amp; data$RAF == "High")
 mek_med_raf_high / raf_high
 ```
 
 ```
 ## [1] 0.496
 ```
+
 ]
 
 ]
 
 .left-column[
-Conditional probabilities of MEK expression
+Local probabilities of MEK expression `\(P(\text{MEK} \mid \text{RAF})\)`
 &lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
-# Discrete Bayesian networks
+# A BN of dependent genes
 
-Conditional probabilities of PIP2 expression
+Local probabilities of PIP2 expression `\(P(\text{PIP2} \mid \text{PLCG}, \text{RAF})\)`
 &lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# A BN of dependent genes
+
+Usually the structure of the BN is not known. We need to learn the edges and fit the parameters `\(\theta\)`.
+
+.centeredtwo[
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 
@@ -226,6 +224,7 @@ Conditional probabilities of PIP2 expression
 - A method for learning the structure:
   - Score-based learning (e.g., using BIC as score)
   - Constraint-based learning (i.e., using CI)
+- A method for inferring parameters: MAP or MLE
 - Understanding what the learned BN *can* tell us
 
 ---
@@ -236,7 +235,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 
 .onethirdcolumn[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -246,7 +245,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 ]
 
 .onethirdcolumnborder[
-&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -256,7 +255,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -272,7 +271,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 Test conditional independence of pairs of variables.
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -294,7 +293,7 @@ x2 = 22.44, df = 4, p-value = 0.0001638
 Remove edges if variables are conditionally independent.
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -316,17 +315,17 @@ x2 = 90.678, df = 108, p-value = 0.8854
 Cannot (generally) learn direction of edges from observational data. All three DAGs have same score and encode same CIs!
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;&lt;br&gt;
 `\(X \not\!\perp\!\!\!\perp Z\)`, `\(X \perp\!\!\!\perp Z \mid Y\)`
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -336,7 +335,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 *Can* learn direction of immorality.
 
 .centeredtwo[
-&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;&lt;br&gt;
 `\(X \perp\!\!\!\perp Z\)`, `\(X \not\!\perp\!\!\!\perp Z \mid Y\)`
 ]
@@ -347,7 +346,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 
 .left-column[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -357,7 +356,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 ]
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -372,7 +371,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 
 Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
 .left-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
 ]
 .right-column[
 **Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
@@ -398,7 +397,7 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 # Gaussian Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -427,7 +426,7 @@ Gene expression levels
 # Gaussian Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[

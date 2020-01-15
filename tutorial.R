@@ -50,6 +50,8 @@ tabu.bde <- tabu(cat.signalling.data, score = "bde")
 plot(tabu.bde)
 
 pc.bn <- pc.stable(cat.signalling.data, test="x2")
+
+
 plot(cpdag(pc.bn))
 ft <- bn.fit(pc.bn, cat.signalling.data, method = "mle")
 ft
@@ -62,6 +64,8 @@ coef(ss$MEK)
 mean(signalling.data$MEK)
 
 s <- pc.stable(signalling.data)
+bn.fit(s, signalling.data)
+
 plot(s)
 bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
 

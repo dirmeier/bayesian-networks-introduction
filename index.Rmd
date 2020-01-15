@@ -130,6 +130,7 @@ empty.dag$data$yend <- NA_integer_
 
 cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
 signalling.data <- readRDS("./data/signalling_data.rds")
+data <- cat.signalling.data
 
 bn <- empty.graph(colnames(cat.signalling.data))
 arcs(bn) <- dagitty::edges(dag)[,1:2] %>%
@@ -162,7 +163,7 @@ ggdag::ggdag(dag) +
 ```
 
 $$\begin{align}
-P(\cdot)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
+P(\cdot \mid \theta, G)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
 \end{align}$$
 ]
 
@@ -171,7 +172,7 @@ A Bayesian network is a probability distribution $P$ of a multivariate random va
 
 - nodes: random variables $X_i$
 - edges: conditional dependencies
-- factorization: $P(X) = \prod_i P(X_i \mid \mathbf{pa}_i)$
+- factorization: $P(X \mid \theta, G) = \prod_i P(X_i \mid \mathbf{pa}_i)$
 ]
 
 ---
@@ -186,48 +187,65 @@ ggdag::ggdag(dag) +
 ]
 
 .left-column[
-Gene expression levels of some genes
-```{r, echo=FALSE}
-tibble::as.tibble(cat.signalling.data)
+
+Dependent gene expression levels
+
+```{r}
+head(data)
 ```
 ]
 
 ---
 
-# Discrete Bayesian networks
+# A BN of dependent genes
 
 .right-column[
-```{r, echo=FALSE, dpi=1200, out.width = '40%'}
-data <- cat.signalling.data
+```{r, echo=FALSE, dpi=1200, out.width = '60%'}
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
 
 .small[
+
 ```{r}
 raf_high <- sum(data$RAF == "High")
 mek_med_raf_high <- sum(data$MEK == "Medium" & data$RAF == "High")
 mek_med_raf_high / raf_high
 ```
+
 ]
 
 ]
 
 .left-column[
-Conditional probabilities of MEK expression
+Local probabilities of MEK expression $P(\text{MEK} \mid \text{RAF})$
 ```{r, echo=FALSE}
-bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
+bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
 ```
 ]
 
 ---
 
-# Discrete Bayesian networks
+# A BN of dependent genes
 
-Conditional probabilities of PIP2 expression
+Local probabilities of PIP2 expression $P(\text{PIP2} \mid \text{PLCG}, \text{RAF})$
 ```{r, echo=FALSE, fig.height=5, fig.width=10}
-bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
+bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = NULL, ylab=NULL)
 ```
+
+
+---
+
+# A BN of dependent genes
+
+Usually the structure of the BN is not known. We need to learn the edges and fit the parameters $\theta$.
+
+.centeredtwo[
+```{r, echo=FALSE, dpi=1200, out.width = '60%'}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
 
 ---
 
@@ -239,6 +257,7 @@ bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL
 - A method for learning the structure:
   - Score-based learning (e.g., using BIC as score)
   - Constraint-based learning (i.e., using CI)
+- A method for inferring parameters: MAP or MLE
 - Understanding what the learned BN *can* tell us
 
 ---
