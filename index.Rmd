@@ -49,7 +49,7 @@ a, a code {
 }
 
 .right-column {
-  width: 45%;
+  width: 50%;
   height: 92%;
   float: right;
   color: black;
@@ -61,7 +61,7 @@ a, a code {
   color: black;
 }
 
-.onethirdcolumn {
+.onethirdcolumn, .onethirdcolumnborder {
   margin-left: 5px;
   margin-right: 5px;
   width: 30%; 
@@ -70,6 +70,22 @@ a, a code {
   color: black;
   padding-top: 0em;
   box-sizing: border-box;
+}
+
+.onethirdcolumnborder {
+  border-style: solid;
+  border-width: 0px 1px 0px 1px;
+}
+
+.centeredtwo {
+  margin: auto;
+  width: 50%;
+  height: 92%;
+  color: black;
+  padding-top: 0em;
+  box-sizing: border-box;
+  margin: auto;
+  text-align: center;
 }
 
 body {
@@ -88,7 +104,6 @@ library(tibble)
 
 library(ggdag)
 library(dagitty)
-library(pcalg)
 library(bnlearn)
 
 dag <- dagitty::dagitty('dag {
@@ -103,6 +118,12 @@ dag <- dagitty::dagitty('dag {
     RAF -> MEK
 }')
 
+empty.dag <- ggdag::tidy_dagitty(dag)
+empty.dag$data$direction <- NA
+empty.dag$data$to <- NA
+empty.dag$data$xend <- NA_integer_
+empty.dag$data$yend <- NA_integer_
+
 cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
 signalling.data <- readRDS("./data/signalling_data.rds")
 
@@ -111,6 +132,7 @@ arcs(bn) <- dagitty::edges(dag)[,1:2] %>%
   dplyr::mutate(v = as.character(v), w = as.character(w)) %>%
   dplyr::rename(from=v, to=w)
 bn_fit <- bn.fit(bn, cat.signalling.data)
+bn_fit.gaussian <- bn.fit(bn, signalling.data)
 ```
 
 # Before we start
@@ -119,7 +141,7 @@ bn_fit <- bn.fit(bn, cat.signalling.data)
 - If you want to follow the tutorials on your laptop, you need some packages. Install them using:
 
 ```{r, eval=FALSE}
-install.packages(c("dagitty", "pcalg", "bnlearn"))
+install.packages("bnlearn")
 ```
 
 - If you want to do them at some point later, the `R` tutorials can be found on: bit.ly/bayesian-networks
@@ -152,15 +174,14 @@ A Bayesian network is a probability distribution $P$ of a multivariate random va
 
 # A BN of dependent genes
 
-.left-column[
-
+.right-column[
 ```{r, echo=FALSE, dpi=1200}
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
 ]
 
-.right-column[
+.left-column[
 Gene expression levels:
 ```{r, echo=FALSE}
 tibble::as.tibble(cat.signalling.data)
@@ -171,15 +192,14 @@ tibble::as.tibble(cat.signalling.data)
 
 # A BN of dependent genes
 
-.left-column[
-
+.right-column[
 ```{r, echo=FALSE, dpi=1200}
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
 ]
 
-.right-column[
+.left-column[
 Conditional probabilities of MEK expression
 ```{r, echo=FALSE}
 bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
@@ -190,7 +210,7 @@ bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
 
 # A BN of dependent genes
 
-Conditional probabilities of PIP2 expression:
+Conditional probabilities of PIP2 expression
 ```{r, echo=FALSE, fig.height=5, fig.width=10}
 bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
 ```
@@ -200,11 +220,12 @@ bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL
 # Let's learn a BN from data
 ## What do we need ?
 
-- A research question
+- A research question (i.e., does MEK regulate RAF expression)
 - Data 
 - A method for learning the structure:
   - Score-based learning (e.g., using BIC as score)
   - Constraint-based learning (i.e., using CI)
+- Understanding what the learned BN *can* tell us
 
 ---
 
@@ -215,24 +236,16 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: $\text{s
 .onethirdcolumn[
 
 ```{r, echo=FALSE}
-dagitty::dagitty('dag {
-    RAF [pos="2,2"]
-    MEK [pos="2,1"]
-    PIP3 [pos="1,0"]
-    PIP2 [pos="1,1"]
-    PLCG [pos="0,2"]
-}') %>% plot()
+ggdag::ggdag(empty.dag) + ggplot2::theme_void()
 ```
 
 ```{r, eval=FALSE}
 > score(graph, data)
 [1] -200
 ```
-
 ]
 
-.onethirdcolumn[
-
+.onethirdcolumnborder[
 ```{r, echo=FALSE}
 dagitty::dagitty('dag {
     RAF [pos="2,2"]
@@ -243,18 +256,16 @@ dagitty::dagitty('dag {
     
     PIP2 -> PIP3 <- PLCG
     MEK <- RAF
-}') %>% plot()
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
 ```
 
 ```{r, eval=FALSE}
 > score(graph, data)
 [1] 1
 ```
-
 ]
 
 .onethirdcolumn[
-
 ```{r, echo=FALSE}
 dagitty::dagitty('dag {
     RAF [pos="2,2"]
@@ -265,22 +276,22 @@ dagitty::dagitty('dag {
     
     RAF -> PIP2 -> PIP3 <- PLCG
     MEK <- RAF -> PLCG
-}') %>% plot()
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
 ```
 
 ```{r, eval=FALSE}
 > score(graph, data)
 [1] 10
 ```
-
 ]
 
 ---
 
 # Constraint-based learning
 
-.left-column[
+Test conditional independence of pairs of variables.
 
+.right-column[
 ```{r, echo=FALSE}
 dagitty::dagitty('dag {
     RAF [pos="2,2"]
@@ -289,48 +300,144 @@ dagitty::dagitty('dag {
     PIP2 [pos="1,1"]
     PLCG [pos="0,2"]
     
-    PLCG -- PIP3
-}') %>% plot()
+    PIP3 <-> PLCG
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
 ```
 
 ]
 
-.right-column [
-
+.left-column[
+Are PIP3 and PLCG marginally independent?
 ```{r, eval=FALSE}
 > ci.test("PIP3", "PLCG", data)
 
 data:  PIP3 ~ PLCG  
-mi = 24.924, df = 4, p-value = 5.212e-05
-alternative hypothesis: true value is greater than 0
+x2 = 22.44, df = 4, p-value = 0.0001638
 ```
-
 ]
+
+---
 
 # Constraint-based learning
 
+Remove edges if variables are conditionally independent.
+
+.right-column[
+```{r, echo=FALSE}
+ggdag::ggdag(empty.dag) + ggplot2::theme_void()
+```
+]
+
+.left-column[
+Are PIP3 and PLCG conditionally independent?
+```{r, eval=FALSE}
+> ci.test("PIP3", "PLCG", 
+          c("PIP2", "RAF", "MEK"), data)
+
+data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
+x2 = 90.678, df = 108, p-value = 0.8854
+```
+]
+
+---
+
+# Things to consider
+
+Cannot (generally) learn direction of edges from observational data. All three DAGs have same score and encode same CIs!
+
+.onethirdcolumn[
 ```{r, echo=FALSE}
 dagitty::dagitty('dag {
-    RAF [pos="2,2"]
-    MEK [pos="2,1"]
-    PIP3 [pos="1,0"]
-    PIP2 [pos="1,1"]
-    PLCG [pos="0,2"]
-}') %>% plot()
+    Z [pos="2,2"]
+    Y [pos="1,1"]
+    X [pos="0,2"]
+    
+    X -> Y -> Z
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
+```
+]
+
+.onethirdcolumn[
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    Z [pos="2,2"]
+    Y [pos="1,1"]
+    X [pos="0,2"]
+    
+    X <- Y <- Z
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
+```
+<br><br>
+$X \not\!\perp\!\!\!\perp Z$, $X \perp\!\!\!\perp Z \mid Y$
+]
+
+.onethirdcolumn[
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    Z [pos="2,2"]
+    Y [pos="1,1"]
+    X [pos="0,2"]
+    
+    X <- Y -> Z
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
+```
+]
+
+---
+
+# Things to consider
+
+*Can* learn direction of immorality.
+
+.centeredtwo[
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    Z [pos="2,2"]
+    Y [pos="1,1"]
+    X [pos="0,2"]
+    
+    X -> Y <- Z
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
+```
+<br><br>
+$X \perp\!\!\!\perp Z$, $X \not\!\perp\!\!\!\perp Z \mid Y$
+]
+
+---
+
+# Examples
+
+.left-column[
+
+```{r, echo=FALSE}
+ggdag::ggdag(dag) + ggplot2::theme_void()
 ```
 
+```{r, eval=FALSE}
+> score(dag1, data)
+[1] -2589.816
+```
 ]
 
 .right-column[
+```{r, echo=FALSE}
+dagitty('dag {
+  RAF [pos="2,2"]
+  MEK [pos="2,1"]
+  PIP3 [pos="1,0"]
+  PIP2 [pos="1,1"]
+  PLCG [pos="0,2"]
 
-```{r, eval=FALSE}
-> ci.test("PIP3", "PLCG", c("PIP2", "RAF", "MEK"), data)
-
-data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
-mi = 107.22, df = 108, p-value = 0.5031
-alternative hypothesis: true value is greater than 0
+  RAF -> PIP2 <- PLCG
+  PIP2 -> PIP3
+  RAF <- MEK
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
 ```
 
+```{r, eval=FALSE}
+> score(dag2, data)
+[1] -2589.816
+```
 ]
 
 ---
@@ -339,11 +446,28 @@ alternative hypothesis: true value is greater than 0
 ## R tutorial 1
 
 - Read the data (`data/singalling_data-categorical.rds`) into `R`.
-- Use `bnlearn::tabu`
-
+- Learn the structure of a BN using:
+    - `bnlearn::tabu`
+    - `bnlearn::pc.stable`
+- Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
+- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
 
 ---
 
-# Why are some edges not directed ?!
+# Gaussian Bayesian networks
 
-CIs cannot be resolved!
+
+.right-column[
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.left-column[
+Gene expression levels:
+```{r, echo=FALSE}
+tibble::as.tibble(signalling.data)
+```
+]
+

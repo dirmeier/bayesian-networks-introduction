@@ -2,8 +2,8 @@ library(dplyr)
 
 library(tibble)
 library(ggplot2)
-library(ggdag)
 library(dagitty)
+
 library(bnlearn)
 
 
@@ -48,13 +48,46 @@ tabu.bde <- tabu(cat.signalling.data, score = "bde")
 plot(tabu.bde)
 
 pc.bn <- pc.stable(cat.signalling.data, test="x2")
-pc.bn
+plot(cpdag(pc.bn))
 ft <- bn.fit(pc.bn, cat.signalling.data, method = "mle")
 ft
 
 plot(g)
 s <- tabu(signalling.data, score = "bge")
 plot(s)
+ss <- bn.fit(s, signalling.data)
+coef(ss$MEK)
+mean(signalling.data$MEK)
+
 s <- pc.stable(signalling.data)
 plot(s)
 bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
+
+
+ci.test("PIP3", "PLCG", data=cat.signalling.data, test="x2")
+ci.test("PIP3", "PLCG", c("PIP2", "RAF", "MEK"), data=cat.signalling.data, test="x2")
+
+
+s <- tabu(signalling.data, score = "bge")
+plot(s)
+score(s, signalling.data)
+
+plot(cpdag(s))
+
+dag1 <- model2network("[MEK][PLCG][RAF|MEK][PIP2|PLCG:RAF][PIP3|PIP2]")
+dag2 <- model2network("[RAF][PLCG][MEK|RAF][PIP2|PLCG:RAF][PIP3|PIP2]")
+plot(dag1)
+plot(dag2)
+
+score(dag1, cat.signalling.data, type = "bde")
+score(dag2, cat.signalling.data, type = "bde")
+
+
+
+plot(g)
+s <- tabu(signalling.data, score = "bge")
+plot(s)
+ss <- bn.fit(s, signalling.data)
+coef(ss$MEK)
+mean(signalling.data$MEK)
+
