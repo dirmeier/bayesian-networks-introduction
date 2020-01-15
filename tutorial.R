@@ -31,6 +31,7 @@ arcs(dag) <- arcs
 
 bn_fit <- bn.fit(dag, cat.signalling.data)
 
+score(dag, cat.signalling.data,)
 
 
 par(mfrow=c(3, 1))
@@ -45,6 +46,11 @@ ft$PIP2
 
 tabu.bde <- tabu(cat.signalling.data, score = "bde")
 plot(tabu.bde)
+
+pc.bn <- pc.stable(cat.signalling.data, test="x2")
+pc.bn
+ft <- bn.fit(pc.bn, cat.signalling.data, method = "mle")
+ft
 
 plot(g)
 s <- tabu(signalling.data, score = "bge")

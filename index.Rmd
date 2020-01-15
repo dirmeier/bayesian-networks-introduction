@@ -61,6 +61,17 @@ a, a code {
   color: black;
 }
 
+.onethirdcolumn {
+  margin-left: 5px;
+  margin-right: 5px;
+  width: 30%; 
+  height: 92%;
+  float: left; 
+  color: black;
+  padding-top: 0em;
+  box-sizing: border-box;
+}
+
 body {
   color: black;
 }
@@ -189,8 +200,138 @@ bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL
 # Let's learn a BN from data
 ## What do we need ?
 
-- Read the data (`data/singalling_data-categorical.rds`) into `R`.
-- Use `bnlearn::tabu`
+- A research question
+- Data 
+- A method for learning the structure:
+  - Score-based learning (e.g., using BIC as score)
+  - Constraint-based learning (i.e., using CI)
+
+---
+
+# Score-based learning
+
+Search space of DAGs and find the one that maximizes a score, e.g. BIC: $\text{score}(G) = \log P(D \mid \hat{\theta}, G) - \frac{\nu}{2} \log n$
+
+.onethirdcolumn[
+
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
+}') %>% plot()
+```
+
+```{r, eval=FALSE}
+> score(graph, data)
+[1] -200
+```
+
+]
+
+.onethirdcolumn[
+
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
+    
+    PIP2 -> PIP3 <- PLCG
+    MEK <- RAF
+}') %>% plot()
+```
+
+```{r, eval=FALSE}
+> score(graph, data)
+[1] 1
+```
+
+]
+
+.onethirdcolumn[
+
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
+    
+    RAF -> PIP2 -> PIP3 <- PLCG
+    MEK <- RAF -> PLCG
+}') %>% plot()
+```
+
+```{r, eval=FALSE}
+> score(graph, data)
+[1] 10
+```
+
+]
+
+---
+
+# Constraint-based learning
+
+.left-column[
+
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
+    
+    PLCG -- PIP3
+}') %>% plot()
+```
+
+]
+
+.right-column [
+
+```{r, eval=FALSE}
+> ci.test("PIP3", "PLCG", data)
+
+data:  PIP3 ~ PLCG  
+mi = 24.924, df = 4, p-value = 5.212e-05
+alternative hypothesis: true value is greater than 0
+```
+
+]
+
+# Constraint-based learning
+
+```{r, echo=FALSE}
+dagitty::dagitty('dag {
+    RAF [pos="2,2"]
+    MEK [pos="2,1"]
+    PIP3 [pos="1,0"]
+    PIP2 [pos="1,1"]
+    PLCG [pos="0,2"]
+}') %>% plot()
+```
+
+]
+
+.right-column[
+
+```{r, eval=FALSE}
+> ci.test("PIP3", "PLCG", c("PIP2", "RAF", "MEK"), data)
+
+data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
+mi = 107.22, df = 108, p-value = 0.5031
+alternative hypothesis: true value is greater than 0
+```
+
+]
 
 ---
 
@@ -199,3 +340,10 @@ bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL
 
 - Read the data (`data/singalling_data-categorical.rds`) into `R`.
 - Use `bnlearn::tabu`
+
+
+---
+
+# Why are some edges not directed ?!
+
+CIs cannot be resolved!

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html>
   <head>
     <title>Bayesian networks in R</title>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <meta name="author" content="Simon Dirmeier simon.dirmeier@bsse.ethz.ch" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
@@ -67,6 +67,17 @@ a, a code {
   color: black;
 }
 
+.onethirdcolumn {
+  margin-left: 5px;
+  margin-right: 5px;
+  width: 30%; 
+  height: 92%;
+  float: left; 
+  color: black;
+  padding-top: 0em;
+  box-sizing: border-box;
+}
+
 body {
   color: black;
 }
@@ -93,7 +104,7 @@ install.packages(c("dagitty", "pcalg", "bnlearn"))
 # What are Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" width="6000" style="display: block; margin: auto;" /&gt;
 
 `$$\begin{align}
 P(\cdot)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; \cdot P(\text{MEK} \mid \text{RAF}) \\ &amp; \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ &amp; \cdot P(\text{PIP3} \mid \text{PIP2})
@@ -114,7 +125,7 @@ A Bayesian network is a probability distribution `\(P\)` of a multivariate rando
 
 .left-column[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-3-1.png" width="6000" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
@@ -134,7 +145,7 @@ Gene expression levels:
 ##  8 Medium Medium High   Medium Low   
 ##  9 High   Low    Low    Medium Low   
 ## 10 High   Low    Low    Low    Medium
-## # … with 490 more rows
+## # ... with 490 more rows
 ```
 ]
 
@@ -144,12 +155,12 @@ Gene expression levels:
 
 .left-column[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="6000" style="display: block; margin: auto;" /&gt;
 ]
 
 .right-column[
 Conditional probabilities of MEK expression
-&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" width="3600" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -157,16 +168,118 @@ Conditional probabilities of MEK expression
 # A BN of dependent genes
 
 Conditional probabilities of PIP2 expression:
-&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" width="7200" style="display: block; margin: auto;" /&gt;
 
 ---
 
-# Let's learn this BN from data
+# Let's learn a BN from data
+## What do we need ?
+
+- A research question
+- Data 
+- A method for learning the structure:
+  - Score-based learning (e.g., using BIC as score)
+  - Constraint-based learning (i.e., using CI)
+
+---
+
+# Score-based learning
+
+Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text{score}(G) = \log P(D \mid \hat{\theta}, G) - \frac{\nu}{2} \log n\)`
+
+.onethirdcolumn[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" width="3600" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] -200
+```
+
+]
+
+.onethirdcolumn[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" width="3600" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] 1
+```
+
+]
+
+.onethirdcolumn[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" width="3600" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] 10
+```
+
+]
+
+---
+
+# Constraint-based learning
+
+.left-column[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-14-1.png" width="3600" style="display: block; margin: auto;" /&gt;
+
+]
+
+.right-column [
+
+
+```r
+&gt; ci.test("PIP3", "PLCG", data)
+
+data:  PIP3 ~ PLCG  
+mi = 24.924, df = 4, p-value = 5.212e-05
+alternative hypothesis: true value is greater than 0
+```
+
+]
+
+# Constraint-based learning
+
+&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" width="3600" style="display: block; margin: auto;" /&gt;
+
+]
+
+.right-column[
+
+
+```r
+&gt; ci.test("PIP3", "PLCG", c("PIP2", "RAF", "MEK"), data)
+
+data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
+mi = 107.22, df = 108, p-value = 0.5031
+alternative hypothesis: true value is greater than 0
+```
+
+]
+
+---
+
+# Let's learn a BN from data
 ## R tutorial 1
 
-Conditional probabilities of PIP2 expression:
+- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+- Use `bnlearn::tabu`
+
+
+---
+
+# Why are some edges not directed ?!
+
+CIs cannot be resolved!
     </textarea>
-<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "default",
@@ -176,57 +289,16 @@ Conditional probabilities of PIP2 expression:
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
 });
-(function(d) {
-  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
   if (!r) return;
   s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
   d.head.appendChild(s);
-})(document);
-
-(function(d) {
-  var el = d.getElementsByClassName("remark-slides-area");
-  if (!el) return;
-  var slide, slides = slideshow.getSlides(), els = el[0].children;
-  for (var i = 1; i < slides.length; i++) {
-    slide = slides[i];
-    if (slide.properties.continued === "true" || slide.properties.count === "false") {
-      els[i - 1].className += ' has-continuation';
-    }
-  }
-  var s = d.createElement("style");
-  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
-  d.head.appendChild(s);
-})(document);
-// delete the temporary CSS (for displaying all slides initially) when the user
-// starts to view slides
-(function() {
-  var deleted = false;
-  slideshow.on('beforeShowSlide', function(slide) {
-    if (deleted) return;
-    var sheets = document.styleSheets, node;
-    for (var i = 0; i < sheets.length; i++) {
-      node = sheets[i].ownerNode;
-      if (node.dataset["target"] !== "print-only") continue;
-      node.parentNode.removeChild(node);
-    }
-    deleted = true;
-  });
 })();</script>
 
 <script>
 (function() {
-  var links = document.getElementsByTagName('a');
-  for (var i = 0; i < links.length; i++) {
-    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
-      links[i].target = '_blank';
-    }
-  }
-})();
-</script>
-
-<script>
-slideshow._releaseMath = function(el) {
-  var i, text, code, codes = el.getElementsByTagName('code');
+  var i, text, code, codes = document.getElementsByTagName('code');
   for (i = 0; i < codes.length;) {
     code = codes[i];
     if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
@@ -240,15 +312,14 @@ slideshow._releaseMath = function(el) {
     }
     i++;
   }
-};
-slideshow._releaseMath(document);
+})();
 </script>
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
 (function () {
   var script = document.createElement('script');
   script.type = 'text/javascript';
-  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
   if (location.protocol !== 'file:' && /^https?:/.test(script.src))
     script.src  = script.src.replace(/^https?:/, '');
   document.getElementsByTagName('head')[0].appendChild(script);
