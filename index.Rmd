@@ -92,6 +92,10 @@ body {
   color: black;
 }
 
+.small .remark-code {
+  font-size: 50% !important;
+}
+
 </style>
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
@@ -182,7 +186,7 @@ ggdag::ggdag(dag) +
 ]
 
 .left-column[
-Gene expression levels:
+Gene expression levels of some genes
 ```{r, echo=FALSE}
 tibble::as.tibble(cat.signalling.data)
 ```
@@ -190,13 +194,23 @@ tibble::as.tibble(cat.signalling.data)
 
 ---
 
-# A BN of dependent genes
+# Discrete Bayesian networks
 
 .right-column[
-```{r, echo=FALSE, dpi=1200}
+```{r, echo=FALSE, dpi=1200, out.width = '40%'}
+data <- cat.signalling.data
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
+
+.small[
+```{r}
+raf_high <- sum(data$RAF == "High")
+mek_med_raf_high <- sum(data$MEK == "Medium" & data$RAF == "High")
+mek_med_raf_high / raf_high
+```
+]
+
 ]
 
 .left-column[
@@ -208,7 +222,7 @@ bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
 
 ---
 
-# A BN of dependent genes
+# Discrete Bayesian networks
 
 Conditional probabilities of PIP2 expression
 ```{r, echo=FALSE, fig.height=5, fig.width=10}
@@ -442,20 +456,46 @@ dagitty('dag {
 
 ---
 
+# Markov equivalence class
+
+Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
+.left-column[
+```{r, echo=FALSE}
+dagitty('dag {
+  RAF [pos="2,2"]
+  MEK [pos="2,1"]
+  PIP3 [pos="1,0"]
+  PIP2 [pos="1,1"]
+  PLCG [pos="0,2"]
+
+  RAF -> PIP2 <- PLCG
+  PIP2 -> PIP3
+  RAF <-> MEK
+}') %>% ggdag::ggdag() + ggplot2::theme_void()
+```
+]
+.right-column[
+**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
+- **no** causal interpretation
+- **only** conditional dependence
+]
+
+---
+
 # Let's learn a BN from data
 ## R tutorial 1
 
-- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+- Load the data: `data/singalling_data-categorical.rds`.
 - Learn the structure of a BN using:
     - `bnlearn::tabu`
     - `bnlearn::pc.stable`
+  Are there any differences ?  
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
+- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery`)
 
 ---
 
 # Gaussian Bayesian networks
-
 
 .right-column[
 ```{r, echo=FALSE, dpi=1200}
@@ -465,9 +505,62 @@ ggdag::ggdag(dag) +
 ]
 
 .left-column[
-Gene expression levels:
+Gene expression levels
 ```{r, echo=FALSE}
 tibble::as.tibble(signalling.data)
 ```
 ]
 
+---
+
+# Gaussian Bayesian networks
+
+.right-column[
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.left-column[
+Parameters of MEK expression
+```{r, eval=FALSE}
+> bn_fit$MEK
+
+Conditional density: MEK | RAF
+Coefficients:
+ (Intercept)           RAF  
+-0.003345871  -0.286159395
+```
+Same as
+```{r, eval=FALSE}
+> lm(MEK ~ RAF, data=data)
+
+Call: lm(formula = MEK ~ RAF, data = data)
+
+Coefficients:
+(Intercept)          RAF  
+  -0.003346    -0.286159  
+```
+
+]
+
+---
+
+# Let's learn a BN from data
+## R tutorial 2
+
+- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+- Learn the structure of a BN using:
+    - `bnlearn::tabu`
+    - `bnlearn::pc.stable`
+- Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
+- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
+
+
+---
+
+# R packages
+
+- `bnlearn` and `pcalg` for structure learning
+- `dagitty` and `ggdag` for plotting

@@ -98,6 +98,10 @@ body {
   color: black;
 }
 
+.small .remark-code {
+  font-size: 50% !important;
+}
+
 &lt;/style&gt;
 
 
@@ -144,7 +148,7 @@ A Bayesian network is a probability distribution `\(P\)` of a multivariate rando
 ]
 
 .left-column[
-Gene expression levels:
+Gene expression levels of some genes
 
 ```
 ## # A tibble: 500 x 5
@@ -166,23 +170,51 @@ Gene expression levels:
 
 ---
 
-# A BN of dependent genes
+# Discrete Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="10%" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+```r
+(raf_high &lt;- sum(data$RAF == "High"))
+```
+
+```
+## [1] 125
+```
+
+```r
+(mek_med_raf_high &lt;- sum(data$MEK == "Medium" &amp; data$RAF == "High"))
+```
+
+```
+## [1] 62
+```
+
+```r
+mek_med_raf_high / raf_high
+```
+
+```
+## [1] 0.496
+```
+]
+
 ]
 
 .left-column[
 Conditional probabilities of MEK expression
-&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
-# A BN of dependent genes
+# Discrete Bayesian networks
 
-Conditional probabilities of PIP2 expression:
-&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+Conditional probabilities of PIP2 expression
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -194,7 +226,8 @@ Conditional probabilities of PIP2 expression:
 - A method for learning the structure:
   - Score-based learning (e.g., using BIC as score)
   - Constraint-based learning (i.e., using CI)
-- Understanding what the learned BN *can* tell us.
+- Understanding what the learned BN *can* tell us
+
 ---
 
 # Score-based learning
@@ -203,7 +236,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 
 .onethirdcolumn[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -213,7 +246,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 ]
 
 .onethirdcolumnborder[
-&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -223,7 +256,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -239,7 +272,7 @@ Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text
 Test conditional independence of pairs of variables.
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
 
 ]
 
@@ -261,7 +294,7 @@ x2 = 22.44, df = 4, p-value = 0.0001638
 Remove edges if variables are conditionally independent.
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -283,17 +316,17 @@ x2 = 90.678, df = 108, p-value = 0.8854
 Cannot (generally) learn direction of edges from observational data. All three DAGs have same score and encode same CIs!
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;&lt;br&gt;
 `\(X \not\!\perp\!\!\!\perp Z\)`, `\(X \perp\!\!\!\perp Z \mid Y\)`
 ]
 
 .onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -303,7 +336,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 *Can* learn direction of immorality.
 
 .centeredtwo[
-&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
 &lt;br&gt;&lt;br&gt;
 `\(X \perp\!\!\!\perp Z\)`, `\(X \not\!\perp\!\!\!\perp Z \mid Y\)`
 ]
@@ -314,7 +347,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 
 .left-column[
 
-&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -324,7 +357,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 ]
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
 
 
 ```r
@@ -332,10 +365,100 @@ Cannot (generally) learn direction of edges from observational data. All three D
 [1] -2589.816
 ```
 ]
+
+---
+
+# Markov equivalence class
+
+Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
+.left-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+]
+.right-column[
+**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
+- **no** causal interpretation
+- **only** conditional dependence
+]
+
 ---
 
 # Let's learn a BN from data
 ## R tutorial 1
+
+- Load the data: `data/singalling_data-categorical.rds`.
+- Learn the structure of a BN using:
+    - `bnlearn::tabu`
+    - `bnlearn::pc.stable`
+  Are there any differences ?  
+- Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
+- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
+
+---
+
+# Gaussian Bayesian networks
+
+.right-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.left-column[
+Gene expression levels
+
+```
+## # A tibble: 500 x 5
+##        MEK    PIP2    PIP3    PLCG     RAF
+##      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+##  1 -0.0170 -0.485   0.305  -0.0577 -0.0198
+##  2  0.285  -0.460  -0.0798  0.0353  0.238 
+##  3 -0.352  -0.351  -0.154   0.221   0.0257
+##  4 -0.0631  0.135  -0.155   0.0757  0.0540
+##  5 -0.0200 -0.504  -0.557  -0.409   0.166 
+##  6 -0.690  -0.0477 -0.361   0.635  -0.0586
+##  7 -0.0898 -0.715  -0.873  -0.234   0.177 
+##  8 -0.0686 -0.0636  0.438  -0.0869 -0.546 
+##  9  0.416  -0.621  -0.285   0.142  -0.221 
+## 10  0.233  -0.557  -0.959  -0.489  -0.0545
+## # … with 490 more rows
+```
+]
+
+---
+
+# Gaussian Bayesian networks
+
+.right-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.left-column[
+Parameters of MEK expression
+
+```r
+&gt; bn_fit$MEK
+
+Conditional density: MEK | RAF
+Coefficients:
+ (Intercept)           RAF  
+-0.003345871  -0.286159395
+```
+Same as
+
+```r
+&gt; lm(MEK ~ RAF, data=data)
+
+Call: lm(formula = MEK ~ RAF, data = data)
+
+Coefficients:
+(Intercept)          RAF  
+  -0.003346    -0.286159  
+```
+
+]
+
+---
+
+# Let's learn a BN from data
+## R tutorial 2
 
 - Read the data (`data/singalling_data-categorical.rds`) into `R`.
 - Learn the structure of a BN using:
@@ -343,13 +466,14 @@ Cannot (generally) learn direction of edges from observational data. All three D
     - `bnlearn::pc.stable`
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
 - Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
-- Make yourself familiar with the different methods for structure learning (i.e., check out `?bnlearn::tabu`, `?bnlearn::hc`, ...)
+
 
 ---
 
-# Why are some edges not directed ?!
+# R packages
 
-CIs cannot be resolved!
+- `bnlearn` and `pcalg` for structure learning
+- `dagitty` and `ggdag` for plotting
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

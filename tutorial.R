@@ -38,6 +38,8 @@ par(mfrow=c(3, 1))
 plot(g)
 tabu.bic <- tabu(cat.signalling.data, score = "bic")
 plot(tabu.bic)
+tabu.bic <- tabu(cat.signalling.data, score = "bic")
+plot(tabu.bic)
 
 ft <- bn.fit(tabu.bic, cat.signalling.data, method = "mle")
 ft$PIP2
@@ -81,6 +83,16 @@ plot(dag2)
 
 score(dag1, cat.signalling.data, type = "bde")
 score(dag2, cat.signalling.data, type = "bde")
+
+par(mfrow=c(3, 1))
+dag1 <- model2network("[MEK][PLCG][RAF|MEK][PIP2|PLCG:RAF][PIP3|PIP2]")
+dag2 <- model2network("[RAF][PLCG][MEK|RAF][PIP2|PLCG:RAF][PIP3|PIP2]")
+plot(dag1)
+plot(dag2)
+
+score(dag1, signalling.data)
+score(dag2, signalling.data)
+plot(cpdag(dag1))
 
 
 
