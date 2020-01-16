@@ -569,12 +569,22 @@ Coefficients:
 # Let's learn a BN from data
 ## R tutorial 2
 
-- Read the data (`data/singalling_data-categorical.rds`) into `R`.
-- Learn the structure of a BN using:
+- Read the data (`data/singalling_data.rds`) into `R`.
+- Learn the structure of a BN using
     - `bnlearn::tabu`
-    - `bnlearn::pc.stable`
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
+- What do the coefficients mean?
+- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery`)
+
+---
+
+# Let's learn a BN from data
+## R tutorial 3
+
+- Get some confidence in the learned edges: 
+- 
+
+
 
 
 ---

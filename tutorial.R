@@ -5,10 +5,21 @@ library(ggplot2)
 library(dagitty)
 
 library(bnlearn)
-
+source("plot_boostrapped_graph.R")
 
 signalling.data <- readRDS("./data/signalling_data.rds")
 cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
+
+boot <- boot.strength(cat.signalling.data, algorithm="tabu")
+boot <- boot.strength(cat.signalling.data, algorithm="tabu")
+
+sbn.boot <- bn.boot(cat.signalling.data, algorithm="tabu")
+
+av <- averaged.network(boot)
+plot()
+
+arcs <- arc.strength(av, cat.signalling.data)
+
 
 g <- dagitty('dag {
     RAF [pos="2,2"]
@@ -106,4 +117,5 @@ plot(s)
 ss <- bn.fit(s, signalling.data)
 coef(ss$MEK)
 mean(signalling.data$MEK)
+
 
