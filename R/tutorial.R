@@ -3,13 +3,14 @@
 # Copyright (C) Simon Dirmeier (<simon.dirmeier @ bsse.ethz.ch>)
 # Date: 17. 01. 2020
 
+
 suppressMessages({
   library(dagitty)
   library(bnlearn)
+  source(file.path(here::here(), "R", "_plot_boostrapped_graph.R"))
 })
 
-par(mfrow=c(2, 1))
-source(file.path(here::here(), "R", "_plot_boostrapped_graph.R"))
+par(mfrow=c(1, 2))
 
 true.dag <- dagitty('dag {
     RAF [pos="2,2"]
@@ -62,6 +63,10 @@ plot(bn.tabu.cpdag)
 bn.pc.cpdag <- bnlearn::cpdag(bn.pc)
 plot(bn.pc.cpdag)
 
+# PC algorithm already gives CPDAG
+plot(bn.pc)
+plot(bn.pc.cpdag)
+
 # Estimate local probability tables
 bn.tabu.fit <- bn.fit(bn.tabu, cat.signalling.data)
 
@@ -71,7 +76,7 @@ for (i in 1:3) {
   print(prob)
 }
 
-#  LPD of MEK
+# LPD of MEK
 # The parameters are observed frequencies in the data
 bn.tabu.fit$MEK
 
@@ -107,7 +112,7 @@ head(signalling.data$MEK)
 hist(signalling.data$MEK)
 hist(signalling.data$PIP2)
 
-# Learn structure with tabu search and BIC at score
+# Learn structure with tabu search and BIC at score on continuous data
 bn.tabu.c <- bnlearn::tabu(signalling.data, score = "bic-g")
 plot(bn.tabu)
 plot(bn.tabu.c)
@@ -119,7 +124,7 @@ plot(bn.tabu.c.t)
 score(bn.tabu.c, signalling.data, type = "bic-g")
 score(bn.tabu.c.t, signalling.data, type = "bic-g")
 
-# Learn structure with chi-squared independence tests
+# Learn structure with independence test for correlation
 bn.pc.c <- bnlearn::pc.stable(signalling.data, test = "cor")
 plot(bn.pc)
 plot(bn.pc.c)

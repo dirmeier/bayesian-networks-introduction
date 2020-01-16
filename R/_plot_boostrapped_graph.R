@@ -18,12 +18,14 @@ plot.bootstrapped <- function(boostrapped.bn)
     igraph::graph_from_data_frame(directed = TRUE) %>%
     ggraph::ggraph(layout = "stress") +
     ggraph::geom_edge_link(aes(color=strength,
+                               edge_width=direction,
                                start_cap = label_rect(node1.name),
                                end_cap = label_rect(node2.name)),
                            arrow = arrow(length = unit(4, 'mm'))) +
     ggraph::geom_node_text(aes(label = name), size = 3) +
     ggraph::scale_edge_color_viridis("Strength", end = .8,
                                      limits = c(.5, 1), option = "B") +
+    ggraph::scale_edge_width("Direction", range=c(.5, 2), limits = c(.5, 1)) +
     ggraph::theme_graph()
 }
 
