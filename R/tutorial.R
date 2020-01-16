@@ -92,6 +92,7 @@ bnlearn::cpquery(bn.tabu.fit,
 bn.fit(bn.pc, cat.signalling.data)
 bn.fit(bn.tabu.cpdag, cat.signalling.data)
 
+
 ################################################################################
 # Part 2
 ################################################################################
@@ -142,101 +143,55 @@ for (i in 1:3) {
 # The parameters are the coefficients of a regression of MEK on RAF
 bn.tabu.c.fit$MEK
 
+
 ################################################################################
-# Part 23
+# Part 3
 ################################################################################
 
 # Bootstrap the data and estimate a BN on every bootstrap sample
 # Then compute edge frequencies and directions
-boot.tabu <- boot.strength(cat.signalling.data, algorithm="tabu")
-boot.tabu.c <- boot.strength(signalling.data, algorithm="tabu")
+
+boot.tabu   <- boot.strength(cat.signalling.data,
+                             algorithm="tabu",algorithm.args = list(score="bic"))
+boot.tabu.c <- boot.strength(signalling.data,
+                             algorithm="tabu", algorithm.args = list(score="bic-g"))
 head(boot.tabu)
 
 plot.bootstrapped(boot.tabu)
 plot.bootstrapped(boot.tabu.c)
 
-dag <- empty.graph(colnames(cat.signalling.data))
-arcs <- dagitty::edges(g)[,1:2] %>%
-  dplyr::mutate(v = as.character(v), w = as.character(w)) %>%
-  dplyr::rename(from=v, to=w)
-arcs(dag) <- arcs
 
-bn_fit <- bn.fit(dag, cat.signalling.data)
+################################################################################
+# Other things to try out
+################################################################################
 
-score(dag, cat.signalling.data,)
+# Plot the LPDs of PIP3
+bn.fit.dotplot(bn.tabu.fit$PIP3, main = NULL, xlab = NULL, ylab=NULL)
 
+# Are assumptions of normality fulfilled?
+bn.fit.qqplot(bn.tabu.c.fit, main = NULL, xlab = NULL, ylab=NULL)
 
-par(mfrow=c(3, 1))
-plot(g)
-tabu.bic <- tabu(cat.signalling.data, score = "bic")
-plot(tabu.bic)
-tabu.bic <- tabu(cat.signalling.data, score = "bic")
-plot(tabu.bic)
-
-ft <- bn.fit(tabu.bic, cat.signalling.data, method = "mle")
-ft$PIP2
-ft <- bn.fit(tabu.bic, cat.signalling.data, method = "bayes")
-ft$PIP2
-
-tabu.bde <- tabu(cat.signalling.data, score = "bde")
-plot(tabu.bde)
-
-pc.bn <- pc.stable(cat.signalling.data, test="x2")
-
-
-plot(cpdag(pc.bn))
-ft <- bn.fit(pc.bn, cat.signalling.data, method = "mle")
-ft
-
-plot(g)
-s <- tabu(signalling.data, score = "bge")
-plot(s)
-ss <- bn.fit(s, signalling.data)
-coef(ss$MEK)
-mean(signalling.data$MEK)
-
-s <- pc.stable(signalling.data)
-bn.fit(s, signalling.data)
-
-plot(s)
-bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = "P(MEK | RAF)", ylab=NULL)
-
-
+# Compute condutional independencies yourself
 ci.test("PIP3", "PLCG", data=cat.signalling.data, test="x2")
 ci.test("PIP3", "PLCG", c("PIP2", "RAF", "MEK"), data=cat.signalling.data, test="x2")
 
+# Write down a model, score it, estimate its CPDs, and plot its CPDAG
+custom.bn <- model2network("[MEK][PLCG][RAF|MEK][PIP2|PLCG:RAF][PIP3|PIP2]")
+plot(custom.bn)
+score(custom.bn, signalling.data, type = "bic-g")
+bn.fit(custom.bn, signalling.data)
+plot(cpdag(custom.bn))
 
-s <- tabu(signalling.data, score = "bge")
-plot(s)
-score(s, signalling.data)
+# Blacklist and whitelist some edges and start with an already estimated bn
+(blacklist <- data.frame(from=c("RAF", "MEK"), to=c("MEK", "RAF")))
+(whitelist <- data.frame(from="PIP3", to="PIP2"))
+blackist.bn.fit <- tabu(signalling.data,
+                        score = "bic-g",
+                        start = bn.tabu.c,
+                        whitelist = whitelist,
+                        blacklist = blacklist)
+plot(blackist.bn.fit)
 
-plot(cpdag(s))
-
-dag1 <- model2network("[MEK][PLCG][RAF|MEK][PIP2|PLCG:RAF][PIP3|PIP2]")
-dag2 <- model2network("[RAF][PLCG][MEK|RAF][PIP2|PLCG:RAF][PIP3|PIP2]")
-plot(dag1)
-plot(dag2)
-
-score(dag1, cat.signalling.data, type = "bde")
-score(dag2, cat.signalling.data, type = "bde")
-
-par(mfrow=c(3, 1))
-dag1 <- model2network("[MEK][PLCG][RAF|MEK][PIP2|PLCG:RAF][PIP3|PIP2]")
-dag2 <- model2network("[RAF][PLCG][MEK|RAF][PIP2|PLCG:RAF][PIP3|PIP2]")
-plot(dag1)
-plot(dag2)
-
-score(dag1, signalling.data)
-score(dag2, signalling.data)
-plot(cpdag(dag1))
-
-
-
-plot(g)
-s <- tabu(signalling.data, score = "bge")
-plot(s)
-ss <- bn.fit(s, signalling.data)
-coef(ss$MEK)
-mean(signalling.data$MEK)
-
-
+# Is it a good BN?
+score(blackist.bn.fit, signalling.data, type = "bic-g")
+score(bn.tabu.c, signalling.data, type = "bic-g")

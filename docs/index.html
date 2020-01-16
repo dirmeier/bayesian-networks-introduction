@@ -119,7 +119,7 @@ body {
 
 ```r
 install.packages(
-  c("bnlearn", "ggraph", "igraph")
+  c("bnlearn", "ggraph", "igraph", "dagitty")
 )
 ```
 
@@ -133,7 +133,7 @@ install.packages(
 .right-column[
 &lt;img src="index_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
 
-`$$\begin{align}
+`$$\small \begin{align}
 P(\cdot \mid \theta, G)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; \cdot P(\text{MEK} \mid \text{RAF}) \\ &amp; \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ &amp; \cdot P(\text{PIP3} \mid \text{PIP2})
 \end{align}$$`
 ]
@@ -473,7 +473,7 @@ Cannot (generally) learn direction of edges from observational data. All three D
 
 # Markov equivalence class
 
-Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
+Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph* (CPDAG).
 .left-column[
 &lt;img src="index_files/figure-html/unnamed-chunk-35-1.png" style="display: block; margin: auto;" /&gt;
 ]
@@ -488,11 +488,10 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 # Let's learn a BN from data
 ## R tutorial 1
 
-- Load the data: `data/singalling_data-categorical.rds`.
+- Load the data: `data/singalling_data-categorical.rds`
 - Learn the structure of a BN using:
     - `bnlearn::tabu`
     - `bnlearn::pc.stable`
-  Are there any differences ?  
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
 - Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
 
@@ -501,12 +500,11 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 # Let's learn a BN from data
 ## R tutorial 2
 
-- Read the data (`data/singalling_data.rds`) into `R`.
-- Learn the structure of a BN using
-    - `bnlearn::tabu`
+- Load the data: `data/singalling_data.rds`
+- Learn the structure of a BN using `bnlearn::tabu` and `bnlearn::pc.stable` (do we still get warnings?)
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- What do the coefficients mean?
-- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
+- Make a query: `\(P(\text{MEK} &gt; 0 \mid \text{RAF} &lt; 0)\)` (`bnlearn::cpquery`)
+- What do the coefficients mean ?
 
 ---
 

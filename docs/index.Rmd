@@ -170,7 +170,7 @@ ggdag::ggdag(dag) +
   ggplot2::theme_void()
 ```
 
-$$\begin{align}
+$$\small \begin{align}
 P(\cdot \mid \theta, G)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
 \end{align}$$
 ]
