@@ -10,6 +10,7 @@ This repository contains a practical introduction to *Bayesian networks* in `R` 
 
 To go through the `R` tutorials do the following:
 
+- download the latest zip-file [here](https://github.com/dirmeier/bayesian-networks-introduction/releases) and extract it,
 - open *Rstudio*,
 - click *File -> Open Project* and select `bayesian-networks-introduction.Rproj`,
 - open `R/tutorial.R`,
