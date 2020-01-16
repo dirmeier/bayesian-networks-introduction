@@ -96,6 +96,7 @@ body {
   font-size: 50% !important;
 }
 
+
 </style>
 
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE}
@@ -146,11 +147,12 @@ bn_fit.gaussian <- bn.fit(bn, signalling.data)
 - If you want to follow the tutorials on your laptop, you need some packages. Install them using:
 
 ```{r, eval=FALSE}
-install.packages("bnlearn")
+install.packages(
+  c("bnlearn", "ggraph", "igraph")
+)
 ```
 
-- If you want to do them at some point later, the `R` tutorials can be found on: bit.ly/bayesian-networks
- (the `R` files).
+- If you want to do them at some point later, the `R` tutorials can be found on: [bit.ly/bayesian-networks](http://bit.ly/bayesian-networks).
 
 ---
 
@@ -199,50 +201,11 @@ head(data)
 
 # A BN of dependent genes
 
-.right-column[
-```{r, echo=FALSE, dpi=1200, out.width = '60%'}
-ggdag::ggdag(dag) + 
-  ggplot2::theme_void()
-```
-
-.small[
-
-```{r}
-raf_high <- sum(data$RAF == "High")
-mek_med_raf_high <- sum(data$MEK == "Medium" & data$RAF == "High")
-mek_med_raf_high / raf_high
-```
-
-]
-
-]
-
-.left-column[
-Local probabilities of MEK expression $P(\text{MEK} \mid \text{RAF})$
-```{r, echo=FALSE}
-bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
-```
-]
-
----
-
-# A BN of dependent genes
-
-Local probabilities of PIP2 expression $P(\text{PIP2} \mid \text{PLCG}, \text{RAF})$
-```{r, echo=FALSE, fig.height=5, fig.width=10}
-bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = NULL, ylab=NULL)
-```
-
-
----
-
-# A BN of dependent genes
-
 Usually the structure of the BN is not known. We need to learn the edges and fit the parameters $\theta$.
 
 .centeredtwo[
-```{r, echo=FALSE, dpi=1200, out.width = '60%'}
-ggdag::ggdag(dag) + 
+```{r, echo=FALSE}
+ggdag::ggdag(empty.dag) + 
   ggplot2::theme_void()
 ```
 ]
@@ -259,6 +222,97 @@ ggdag::ggdag(dag) +
   - Constraint-based learning (i.e., using CI)
 - A method for inferring parameters: MAP or MLE
 - Understanding what the learned BN *can* tell us
+
+---
+
+# Discrete Bayesian networks
+
+.right-column[
+```{r, echo=FALSE, dpi=1200, out.width = '60%'}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+
+.small[
+
+```{r}
+raf_high <- sum(data$RAF == "High")
+mek_med_raf_high <- sum(data$MEK == "Medium" & 
+                        data$RAF == "High")
+mek_med_raf_high / raf_high
+```
+
+]
+
+]
+
+.left-column[
+Local probabilities of MEK expression $P(\text{MEK} \mid \text{RAF})$
+```{r, echo=FALSE}
+bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
+```
+]
+
+---
+
+# Discrete Bayesian networks
+
+Local probabilities of PIP2 expression $P(\text{PIP2} \mid \text{PLCG}, \text{RAF})$
+```{r, echo=FALSE, fig.height=5, fig.width=10}
+bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = NULL, ylab=NULL)
+```
+
+---
+
+# Gaussian Bayesian networks
+
+.right-column[
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.left-column[
+Gene expression levels
+```{r, echo=FALSE}
+tibble::as.tibble(signalling.data)
+```
+]
+
+---
+
+# Gaussian Bayesian networks
+
+.right-column[
+```{r, echo=FALSE, dpi=1200}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+]
+
+.left-column[
+Parameters of MEK expression
+```{r, eval=FALSE}
+> bn_fit$MEK
+
+Conditional density: MEK | RAF
+Coefficients:
+ (Intercept)           RAF  
+-0.003345871  -0.286159395
+```
+Same as
+```{r, eval=FALSE}
+> lm(MEK ~ RAF, data=data)
+
+Call: lm(formula = MEK ~ RAF, data = data)
+
+Coefficients:
+(Intercept)          RAF  
+  -0.003346    -0.286159  
+```
+
+]
 
 ---
 
@@ -514,58 +568,6 @@ dagitty('dag {
 
 ---
 
-# Gaussian Bayesian networks
-
-.right-column[
-```{r, echo=FALSE, dpi=1200}
-ggdag::ggdag(dag) + 
-  ggplot2::theme_void()
-```
-]
-
-.left-column[
-Gene expression levels
-```{r, echo=FALSE}
-tibble::as.tibble(signalling.data)
-```
-]
-
----
-
-# Gaussian Bayesian networks
-
-.right-column[
-```{r, echo=FALSE, dpi=1200}
-ggdag::ggdag(dag) + 
-  ggplot2::theme_void()
-```
-]
-
-.left-column[
-Parameters of MEK expression
-```{r, eval=FALSE}
-> bn_fit$MEK
-
-Conditional density: MEK | RAF
-Coefficients:
- (Intercept)           RAF  
--0.003345871  -0.286159395
-```
-Same as
-```{r, eval=FALSE}
-> lm(MEK ~ RAF, data=data)
-
-Call: lm(formula = MEK ~ RAF, data = data)
-
-Coefficients:
-(Intercept)          RAF  
-  -0.003346    -0.286159  
-```
-
-]
-
----
-
 # Let's learn a BN from data
 ## R tutorial 2
 
@@ -581,15 +583,42 @@ Coefficients:
 # Let's learn a BN from data
 ## R tutorial 3
 
-- Get some confidence in the learned edges: 
-- 
-
-
-
+- Get some confidence in the learned edges. Use `bnlearn::boot.strength` to assess edge strength.
+- Plot the network using
+  - `plot(average.network(...))`
+  - `plot.bootstrapped`
 
 ---
 
 # R packages
 
-- `bnlearn` and `pcalg` for structure learning
-- `dagitty` and `ggdag` for plotting
+- Structure learning: `bnlearn` and `pcalg`
+
+- Causal reasoning: `dagitty` and `ggdag`
+
+- Visualization: `ggraph`
+
+
+---
+
+# References
+
+- Marco Scutari and  Jean-Baptiste Denis, *Bayesian networks with examples in R* (applied)
+
+- David Barber, *Bayesian Reasoning and Machine Learning* (free, theory, good intro) 
+
+- Daphne Kollerand Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
+
+<div>
+  <div style="float: right; padding: 5px">
+  <img src="https://mitpress.mit.edu/sites/default/files/styles/large_book_cover/http/mitp-content-server.mit.edu%3A18180/books/covers/cover/%3Fcollid%3Dbooks_covers_0%26isbn%3D9780262013192%26type%3D.jpg?itok=BDzWXp-V" height="150"/>
+  </div>
+  <div style="float: right; padding: 5px">
+    <img src="http://web4.cs.ucl.ac.uk/staff/D.Barber/textbook/jacket.gif" height="150"/>
+  </div>
+  <div style="float: right; padding: 5px">
+    <img src="http://bnlearn.com/images/crc.jpg" height="150"/>
+  </div>
+</div>
+
+---

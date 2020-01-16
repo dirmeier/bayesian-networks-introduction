@@ -102,6 +102,7 @@ body {
   font-size: 50% !important;
 }
 
+
 &lt;/style&gt;
 
 
@@ -113,11 +114,12 @@ body {
 
 
 ```r
-install.packages("bnlearn")
+install.packages(
+  c("bnlearn", "ggraph", "igraph")
+)
 ```
 
-- If you want to do them at some point later, the `R` tutorials can be found on: bit.ly/bayesian-networks
- (the `R` files).
+- If you want to do them at some point later, the `R` tutorials can be found on: [bit.ly/bayesian-networks](http://bit.ly/bayesian-networks).
 
 ---
 
@@ -171,47 +173,10 @@ head(data)
 
 # A BN of dependent genes
 
-.right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" width="60%" style="display: block; margin: auto;" /&gt;
-
-.small[
-
-
-```r
-raf_high &lt;- sum(data$RAF == "High")
-mek_med_raf_high &lt;- sum(data$MEK == "Medium" &amp; data$RAF == "High")
-mek_med_raf_high / raf_high
-```
-
-```
-## [1] 0.496
-```
-
-]
-
-]
-
-.left-column[
-Local probabilities of MEK expression `\(P(\text{MEK} \mid \text{RAF})\)`
-&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-# A BN of dependent genes
-
-Local probabilities of PIP2 expression `\(P(\text{PIP2} \mid \text{PLCG}, \text{RAF})\)`
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
-
-
----
-
-# A BN of dependent genes
-
 Usually the structure of the BN is not known. We need to learn the edges and fit the parameters `\(\theta\)`.
 
 .centeredtwo[
-&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
@@ -229,175 +194,47 @@ Usually the structure of the BN is not known. We need to learn the edges and fit
 
 ---
 
-# Score-based learning
-
-Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text{score}(G) = \log P(D \mid \hat{\theta}, G) - \frac{\nu}{2} \log n\)`
-
-.onethirdcolumn[
-
-&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
-
-
-```r
-&gt; score(graph, data)
-[1] -200
-```
-]
-
-.onethirdcolumnborder[
-&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
-
-
-```r
-&gt; score(graph, data)
-[1] 1
-```
-]
-
-.onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
-
-
-```r
-&gt; score(graph, data)
-[1] 10
-```
-]
-
----
-
-# Constraint-based learning
-
-Test conditional independence of pairs of variables.
+# Discrete Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-6-1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+.small[
+
+
+```r
+raf_high &lt;- sum(data$RAF == "High")
+mek_med_raf_high &lt;- sum(data$MEK == "Medium" &amp; 
+                        data$RAF == "High")
+mek_med_raf_high / raf_high
+```
+
+```
+## [1] 0.496
+```
+
+]
 
 ]
 
 .left-column[
-Are PIP3 and PLCG marginally independent?
-
-```r
-&gt; ci.test("PIP3", "PLCG", data)
-
-data:  PIP3 ~ PLCG  
-x2 = 22.44, df = 4, p-value = 0.0001638
-```
+Local probabilities of MEK expression `\(P(\text{MEK} \mid \text{RAF})\)`
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 ---
 
-# Constraint-based learning
+# Discrete Bayesian networks
 
-Remove edges if variables are conditionally independent.
-
-.right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
-]
-
-.left-column[
-Are PIP3 and PLCG conditionally independent?
-
-```r
-&gt; ci.test("PIP3", "PLCG", 
-          c("PIP2", "RAF", "MEK"), data)
-
-data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
-x2 = 90.678, df = 108, p-value = 0.8854
-```
-]
-
----
-
-# Things to consider
-
-Cannot (generally) learn direction of edges from observational data. All three DAGs have same score and encode same CIs!
-
-.onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1.png" style="display: block; margin: auto;" /&gt;
-]
-
-.onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
-&lt;br&gt;&lt;br&gt;
-`\(X \not\!\perp\!\!\!\perp Z\)`, `\(X \perp\!\!\!\perp Z \mid Y\)`
-]
-
-.onethirdcolumn[
-&lt;img src="index_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
-]
-
----
-
-# Things to consider
-
-*Can* learn direction of immorality.
-
-.centeredtwo[
-&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
-&lt;br&gt;&lt;br&gt;
-`\(X \perp\!\!\!\perp Z\)`, `\(X \not\!\perp\!\!\!\perp Z \mid Y\)`
-]
-
----
-
-# Examples
-
-.left-column[
-
-&lt;img src="index_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" /&gt;
-
-
-```r
-&gt; score(dag1, data)
-[1] -2589.816
-```
-]
-
-.right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
-
-
-```r
-&gt; score(dag2, data)
-[1] -2589.816
-```
-]
-
----
-
-# Markov equivalence class
-
-Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
-.left-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
-]
-.right-column[
-**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
-- **no** causal interpretation
-- **only** conditional dependence
-]
-
----
-
-# Let's learn a BN from data
-## R tutorial 1
-
-- Load the data: `data/singalling_data-categorical.rds`.
-- Learn the structure of a BN using:
-    - `bnlearn::tabu`
-    - `bnlearn::pc.stable`
-  Are there any differences ?  
-- Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
+Local probabilities of PIP2 expression `\(P(\text{PIP2} \mid \text{PLCG}, \text{RAF})\)`
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
 # Gaussian Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -426,7 +263,7 @@ Gene expression levels
 # Gaussian Bayesian networks
 
 .right-column[
-&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
 ]
 
 .left-column[
@@ -456,23 +293,225 @@ Coefficients:
 
 ---
 
-# Let's learn a BN from data
-## R tutorial 2
+# Score-based learning
 
-- Read the data (`data/singalling_data-categorical.rds`) into `R`.
+Search space of DAGs and find the one that maximizes a score, e.g. BIC: `\(\text{score}(G) = \log P(D \mid \hat{\theta}, G) - \frac{\nu}{2} \log n\)`
+
+.onethirdcolumn[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] -200
+```
+]
+
+.onethirdcolumnborder[
+&lt;img src="index_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] 1
+```
+]
+
+.onethirdcolumn[
+&lt;img src="index_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(graph, data)
+[1] 10
+```
+]
+
+---
+
+# Constraint-based learning
+
+Test conditional independence of pairs of variables.
+
+.right-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+.left-column[
+Are PIP3 and PLCG marginally independent?
+
+```r
+&gt; ci.test("PIP3", "PLCG", data)
+
+data:  PIP3 ~ PLCG  
+x2 = 22.44, df = 4, p-value = 0.0001638
+```
+]
+
+---
+
+# Constraint-based learning
+
+Remove edges if variables are conditionally independent.
+
+.right-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.left-column[
+Are PIP3 and PLCG conditionally independent?
+
+```r
+&gt; ci.test("PIP3", "PLCG", 
+          c("PIP2", "RAF", "MEK"), data)
+
+data:  PIP3 ~ PLCG | PIP2 + RAF + MEK
+x2 = 90.678, df = 108, p-value = 0.8854
+```
+]
+
+---
+
+# Things to consider
+
+Cannot (generally) learn direction of edges from observational data. All three DAGs have same score and encode same CIs!
+
+.onethirdcolumn[
+&lt;img src="index_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.onethirdcolumn[
+&lt;img src="index_files/figure-html/unnamed-chunk-26-1.png" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;&lt;br&gt;
+`\(X \not\!\perp\!\!\!\perp Z\)`, `\(X \perp\!\!\!\perp Z \mid Y\)`
+]
+
+.onethirdcolumn[
+&lt;img src="index_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Things to consider
+
+*Can* learn direction of immorality.
+
+.centeredtwo[
+&lt;img src="index_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" /&gt;
+&lt;br&gt;&lt;br&gt;
+`\(X \perp\!\!\!\perp Z\)`, `\(X \not\!\perp\!\!\!\perp Z \mid Y\)`
+]
+
+---
+
+# Examples
+
+.left-column[
+
+&lt;img src="index_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(dag1, data)
+[1] -2589.816
+```
+]
+
+.right-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" /&gt;
+
+
+```r
+&gt; score(dag2, data)
+[1] -2589.816
+```
+]
+
+---
+
+# Markov equivalence class
+
+Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
+.left-column[
+&lt;img src="index_files/figure-html/unnamed-chunk-33-1.png" style="display: block; margin: auto;" /&gt;
+]
+.right-column[
+**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
+- **no** causal interpretation
+- **only** conditional dependence
+]
+
+---
+
+# Let's learn a BN from data
+## R tutorial 1
+
+- Load the data: `data/singalling_data-categorical.rds`.
 - Learn the structure of a BN using:
     - `bnlearn::tabu`
     - `bnlearn::pc.stable`
+  Are there any differences ?  
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery` or `bnlearn::bn.fit.dotplot`)
+- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
 
+---
+
+# Let's learn a BN from data
+## R tutorial 2
+
+- Read the data (`data/singalling_data.rds`) into `R`.
+- Learn the structure of a BN using
+    - `bnlearn::tabu`
+- Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
+- What do the coefficients mean?
+- Make a query: `\(P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})\)` (`bnlearn::cpquery`)
+
+---
+
+# Let's learn a BN from data
+## R tutorial 3
+
+- Get some confidence in the learned edges. Use `bnlearn::boot.strength` to assess edge strength.
+- Plot the network using
+  - `plot(average.network(...))`
+  - `plot.bootstrapped`
 
 ---
 
 # R packages
 
-- `bnlearn` and `pcalg` for structure learning
-- `dagitty` and `ggdag` for plotting
+- Structure learning: `bnlearn` and `pcalg`
+
+- Causal reasoning: `dagitty` and `ggdag`
+
+- Visualization: `ggraph`
+
+
+---
+
+# References
+
+- Marco Scutari and  Jean-Baptiste Denis, *Bayesian networks with examples in R* (applied)
+
+- David Barber, *Bayesian Reasoning and Machine Learning* (free, theory, good intro) 
+
+- Daphne Kollerand Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
+
+&lt;div&gt;
+  &lt;div style="float: right; padding: 5px"&gt;
+  &lt;img src="https://mitpress.mit.edu/sites/default/files/styles/large_book_cover/http/mitp-content-server.mit.edu%3A18180/books/covers/cover/%3Fcollid%3Dbooks_covers_0%26isbn%3D9780262013192%26type%3D.jpg?itok=BDzWXp-V" height="150"/&gt;
+  &lt;/div&gt;
+  &lt;div style="float: right; padding: 5px"&gt;
+    &lt;img src="http://web4.cs.ucl.ac.uk/staff/D.Barber/textbook/jacket.gif" height="150"/&gt;
+  &lt;/div&gt;
+  &lt;div style="float: right; padding: 5px"&gt;
+    &lt;img src="http://bnlearn.com/images/crc.jpg" height="150"/&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+---
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
