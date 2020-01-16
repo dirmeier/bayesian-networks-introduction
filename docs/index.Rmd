@@ -96,6 +96,10 @@ body {
   font-size: 50% !important;
 }
 
+.small {
+  font-size: 85% !important;
+}
+
 
 </style>
 
@@ -129,9 +133,10 @@ empty.dag$data$to <- NA
 empty.dag$data$xend <- NA_integer_
 empty.dag$data$yend <- NA_integer_
 
-cat.signalling.data <- readRDS("./data/signalling_data-categorical.rds")
-signalling.data <- readRDS("./data/signalling_data.rds")
+cat.signalling.data <- readRDS("../data/signalling_data-categorical.rds")
+signalling.data <- readRDS("../data/signalling_data.rds")
 data <- cat.signalling.data
+normal.data <- signalling.data
 
 bn <- empty.graph(colnames(cat.signalling.data))
 arcs(bn) <- dagitty::edges(dag)[,1:2] %>%
@@ -152,7 +157,8 @@ install.packages(
 )
 ```
 
-- If you want to do them at some point later, the `R` tutorials can be found on: [bit.ly/bayesian-networks](http://bit.ly/bayesian-networks).
+- If you want to do them at some point later, the `R` tutorials can be found on: [bit.ly/bayesian-networks](http://bit.ly/bayesian-networks)
+- Slides: [bit.ly/bayesian-networks-slides](http://bit.ly/bayesian-networks-slides)
 
 ---
 
@@ -189,9 +195,7 @@ ggdag::ggdag(dag) +
 ]
 
 .left-column[
-
 Dependent gene expression levels
-
 ```{r}
 head(data)
 ```
@@ -201,7 +205,7 @@ head(data)
 
 # A BN of dependent genes
 
-Usually the structure of the BN is not known. We need to learn the edges and fit the parameters $\theta$.
+Usually the structure of the BN is not known. <br>We need to learn the edges and fit the parameters $\theta$.
 
 .centeredtwo[
 ```{r, echo=FALSE}
@@ -228,28 +232,16 @@ ggdag::ggdag(empty.dag) +
 # Discrete Bayesian networks
 
 .right-column[
-```{r, echo=FALSE, dpi=1200, out.width = '60%'}
+```{r, echo=FALSE, dpi=1200}
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
-
-.small[
-
-```{r}
-raf_high <- sum(data$RAF == "High")
-mek_med_raf_high <- sum(data$MEK == "Medium" & 
-                        data$RAF == "High")
-mek_med_raf_high / raf_high
-```
-
-]
-
 ]
 
 .left-column[
-Local probabilities of MEK expression $P(\text{MEK} \mid \text{RAF})$
-```{r, echo=FALSE}
-bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
+Dependent gene expression levels (multinomial variables)
+```{r}
+head(data)
 ```
 ]
 
@@ -257,9 +249,44 @@ bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
 
 # Discrete Bayesian networks
 
-Local probabilities of PIP2 expression $P(\text{PIP2} \mid \text{PLCG}, \text{RAF})$
-```{r, echo=FALSE, fig.height=5, fig.width=10}
-bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = NULL, ylab=NULL)
+.right-column[
+```{r, echo=FALSE, dpi=1200, out.width = '60%'}
+ggdag::ggdag(dag) + 
+  ggplot2::theme_void()
+```
+
+$$\small \begin{align}
+P(\cdot \mid \theta, G)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
+\end{align}$$
+
+]
+
+.left-column[
+
+.small[
+Local parameters of MEK:
+```{r, echo=FALSE, out.width = '80%'}
+bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
+```
+
+Estimated from data:
+```{r}
+raf_high <- sum(data$RAF == "High")
+mek_med_raf_high <- sum(data$MEK == "Medium" & 
+                        data$RAF == "High")
+mek_med_raf_high / raf_high
+```
+]
+
+]
+
+---
+
+# Discrete Bayesian networks
+
+Local parameters of PIP2
+```{r, echo=FALSE, out.width = '80%', fig.width=10, fig.height=5}
+bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
 ```
 
 ---
@@ -274,9 +301,9 @@ ggdag::ggdag(dag) +
 ]
 
 .left-column[
-Gene expression levels
-```{r, echo=FALSE}
-tibble::as.tibble(signalling.data)
+Dependent gene expression levels (normal variables)
+```{r}
+head(normal.data)
 ```
 ]
 
@@ -285,14 +312,21 @@ tibble::as.tibble(signalling.data)
 # Gaussian Bayesian networks
 
 .right-column[
-```{r, echo=FALSE, dpi=1200}
+```{r, echo=FALSE, dpi=1200, out.width = '60%'}
 ggdag::ggdag(dag) + 
   ggplot2::theme_void()
 ```
+
+$$\small \begin{align}
+P(\cdot \mid \theta, G)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(\text{MEK} \mid \text{RAF}) \\ & \cdot P(\text{PIP2} \mid \text{RAF}, \text{PLCG}) \\ & \cdot P(\text{PIP3} \mid \text{PIP2})
+\end{align}$$
+
 ]
 
 .left-column[
-Parameters of MEK expression
+
+.small[
+Local parameters of MEK:
 ```{r, eval=FALSE}
 > bn_fit$MEK
 
@@ -301,7 +335,8 @@ Coefficients:
  (Intercept)           RAF  
 -0.003345871  -0.286159395
 ```
-Same as
+
+Estimated from data:
 ```{r, eval=FALSE}
 > lm(MEK ~ RAF, data=data)
 
@@ -311,6 +346,7 @@ Coefficients:
 (Intercept)          RAF  
   -0.003346    -0.286159  
 ```
+]
 
 ]
 
