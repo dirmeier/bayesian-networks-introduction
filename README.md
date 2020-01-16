@@ -4,7 +4,16 @@
 
 ## About
 
-This repository contains some tutorials on *Bayesian networks* in `R` using `dagitty`,`bnlearn` and `pcalg`.
+This repository contains a practical introduction to *Bayesian networks* in `R`  using `bnlearn` for teaching of a one-hour course.
+
+## Usage
+
+To go through the `R` tutorials do the following:
+
+- open *Rstudio*,
+- click *File -> Open Project* and select `bayesian-networks-introduction.Rproj`,
+- open `R/tutorial.R`,
+- execute the tutorial line by line.
 
 ## Author
 

@@ -1,7 +1,12 @@
+# R tutorial on Bayesian networks
+#
+# Copyright (C) Simon Dirmeier (<simon.dirmeier @ bsse.ethz.ch>)
+# Date: 17. 01. 2020
+
+
 library(dplyr)
 library(tibble)
 library(dagitty)
-
 
 g <- dagitty('dag {
     RAF [pos="2,2"]
@@ -14,6 +19,7 @@ g <- dagitty('dag {
     PIP2 -> PIP3
     RAF -> MEK
 }')
+
 plot(g)
 
 set.seed(42)

@@ -235,10 +235,12 @@ P(\cdot \mid \theta, G)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; 
 ]
 
 .left-column[
-Local parameters of MEK
-&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /&gt;
-Estimated from data:
+
 .small[
+Local parameters of MEK:
+&lt;img src="index_files/figure-html/unnamed-chunk-9-1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+Estimated from data:
 
 ```r
 raf_high &lt;- sum(data$RAF == "High")
@@ -259,7 +261,7 @@ mek_med_raf_high / raf_high
 # Discrete Bayesian networks
 
 Local parameters of PIP2
-&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -303,7 +305,7 @@ P(\cdot \mid \theta, G)  = &amp; \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ &amp; 
 .left-column[
 
 .small[
-Local parameters of MEK
+Local parameters of MEK:
 
 ```r
 &gt; bn_fit$MEK
@@ -315,7 +317,6 @@ Coefficients:
 ```
 
 Estimated from data:
-
 
 ```r
 &gt; lm(MEK ~ RAF, data=data)
@@ -477,8 +478,8 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 &lt;img src="index_files/figure-html/unnamed-chunk-35-1.png" style="display: block; margin: auto;" /&gt;
 ]
 .right-column[
-**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
-- **no** causal interpretation
+**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and turned around in some cases.
+- **no** causal interpretation (generally)
 - **only** conditional dependence
 ]
 
@@ -527,7 +528,6 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 
 - Visualization: `ggraph`
 
-
 ---
 
 # References
@@ -536,7 +536,7 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
 
 - David Barber, *Bayesian Reasoning and Machine Learning* (free, theory, good intro) 
 
-- Daphne Kollerand Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
+- Daphne Koller and Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
 
 &lt;div&gt;
   &lt;div style="float: right; padding: 5px"&gt;
@@ -549,8 +549,6 @@ Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed pa
     &lt;img src="http://bnlearn.com/images/crc.jpg" height="150"/&gt;
   &lt;/div&gt;
 &lt;/div&gt;
-
----
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

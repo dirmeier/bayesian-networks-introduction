@@ -1,6 +1,15 @@
-library(ggraph)
-library(igraph)
-library(dplyr)
+# R tutorial on Bayesian networks
+#
+# Copyright (C) Simon Dirmeier (<simon.dirmeier @ bsse.ethz.ch>)
+# Date: 17. 01. 2020
+
+
+suppressMessages({
+  library(ggraph)
+  library(igraph)
+  library(dplyr)
+})
+
 
 plot.bootstrapped <- function(boostrapped.bn)
 {

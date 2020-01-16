@@ -153,7 +153,7 @@ bn_fit.gaussian <- bn.fit(bn, signalling.data)
 
 ```{r, eval=FALSE}
 install.packages(
-  c("bnlearn", "ggraph", "igraph")
+  c("bnlearn", "ggraph", "igraph", "dagitty")
 )
 ```
 
@@ -265,7 +265,7 @@ P(\cdot \mid \theta, G)  = & \, P(\text{PLCG}) \cdot P(\text{RAF}) \\ & \cdot P(
 
 .small[
 Local parameters of MEK:
-```{r, echo=FALSE, out.width = '80%'}
+```{r, echo=FALSE, out.width = '75%'}
 bn.fit.dotplot(bn_fit$MEK, main = NULL, xlab = NULL, ylab=NULL)
 ```
 
@@ -285,7 +285,7 @@ mek_med_raf_high / raf_high
 # Discrete Bayesian networks
 
 Local parameters of PIP2
-```{r, echo=FALSE, out.width = '80%', fig.width=10, fig.height=5}
+```{r, echo=FALSE, out.width = '90%', fig.width=10, fig.height=5}
 bn.fit.dotplot(bn_fit$PIP2, main = NULL, xlab = "P(PIP2 | PLCG, RAF)", ylab=NULL)
 ```
 
@@ -567,7 +567,7 @@ dagitty('dag {
 
 # Markov equivalence class
 
-Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph*.
+Can only learn a BN up to its *Markov equivalence class*, i.e. the *completed partially directed acycled graph* (CPDAG).
 .left-column[
 ```{r, echo=FALSE}
 dagitty('dag {
@@ -584,8 +584,8 @@ dagitty('dag {
 ```
 ]
 .right-column[
-**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and in some cases turned around.
-- **no** causal interpretation
+**Crucial detail!** Remember this when interpreting the structure of a BN. Edges can be deceiving and turned around in some cases.
+- **no** causal interpretation (generally)
 - **only** conditional dependence
 ]
 
@@ -594,11 +594,10 @@ dagitty('dag {
 # Let's learn a BN from data
 ## R tutorial 1
 
-- Load the data: `data/singalling_data-categorical.rds`.
+- Load the data: `data/singalling_data-categorical.rds`
 - Learn the structure of a BN using:
     - `bnlearn::tabu`
     - `bnlearn::pc.stable`
-  Are there any differences ?  
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
 - Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery`)
 
@@ -607,12 +606,11 @@ dagitty('dag {
 # Let's learn a BN from data
 ## R tutorial 2
 
-- Read the data (`data/singalling_data.rds`) into `R`.
-- Learn the structure of a BN using
-    - `bnlearn::tabu`
+- Load the data: `data/singalling_data.rds`
+- Learn the structure of a BN using `bnlearn::tabu` and `bnlearn::pc.stable` (do we still get warnings?)
 - Compute the equivalence class of the learned DAGs (`bnlear::cpdag`)
-- What do the coefficients mean?
-- Make a query: $P(\text{MEK} = \text{high} \mid \text{RAF} = \text{low})$ (`bnlearn::cpquery`)
+- Make a query: $P(\text{MEK} > 0 \mid \text{RAF} < 0)$ (`bnlearn::cpquery`)
+- What do the coefficients mean ?
 
 ---
 
@@ -634,7 +632,6 @@ dagitty('dag {
 
 - Visualization: `ggraph`
 
-
 ---
 
 # References
@@ -643,7 +640,7 @@ dagitty('dag {
 
 - David Barber, *Bayesian Reasoning and Machine Learning* (free, theory, good intro) 
 
-- Daphne Kollerand Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
+- Daphne Koller and Nir Friedman,  *Probabilistic Graphical Models* (very exhaustive)
 
 <div>
   <div style="float: right; padding: 5px">
@@ -656,5 +653,3 @@ dagitty('dag {
     <img src="http://bnlearn.com/images/crc.jpg" height="150"/>
   </div>
 </div>
-
----
