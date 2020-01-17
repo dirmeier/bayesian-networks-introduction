@@ -8,6 +8,7 @@ library(dplyr)
 library(tibble)
 library(dagitty)
 
+
 g <- dagitty('dag {
     RAF [pos="2,2"]
     MEK [pos="2,1"]
